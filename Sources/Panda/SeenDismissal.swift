@@ -3,12 +3,12 @@ import SwiftUI
 /// Acknowledgements settle the remaining cards while the departing card stretches out.
 enum SeenDismissal {
     static func animation(reduceMotion: Bool) -> Animation {
-        reduceMotion ? .easeOut(duration: 0.14) : .spring(response: 0.55, dampingFraction: 0.76)
+        reduceMotion ? .easeOut(duration: 0.14) : .spring(response: 0.3, dampingFraction: 0.76)
     }
     static func transition(reduceMotion: Bool) -> AnyTransition {
         if reduceMotion { return .opacity }
         let exit = AnyTransition.modifier(active: RubberBandExit(progress: 1), identity: RubberBandExit(progress: 0))
-            .animation(.linear(duration: 0.6))
+            .animation(.linear(duration: 0.3))
         return .asymmetric(insertion: .opacity, removal: exit)
     }
 }
@@ -35,11 +35,11 @@ private struct RubberBandGeometry: GeometryEffect {
     let progress: CGFloat
     func effectValue(size: CGSize) -> ProjectionTransform {
         let t = min(1, max(0, progress))
-        let pull = smoothExit(t / 0.2)
-        let release = min(1, max(0, (t - 0.2) / 0.8))
+        let pull = smoothExit(t / 0.3)
+        let release = min(1, max(0, (t - 0.3) / 0.7))
         let snap = 1 - pow(1 - release, 3)
-        // Briefly compress/pull left, stretch on release, then relax as the card exits right.
-        let displacement = size.width * (-0.045 * pull + 1.25 * snap)
+        // Pull right for 90 ms, then stretch and snap left out of the panel over 210 ms.
+        let displacement = size.width * (0.045 * pull - 1.25 * snap)
         let stretch = -0.06 * pull * (1 - smoothExit(release / 0.35)) + 0.10 * sin(.pi * release)
         let transform = CGAffineTransform(translationX: size.width / 2 + displacement, y: size.height / 2)
             .scaledBy(x: 1 + stretch, y: 1 - stretch * 0.35)
