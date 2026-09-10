@@ -38,3 +38,10 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Initial Claude code-host links were observed in the app log as feature-gated off. The final implementation uses the existing claude.ai conversation handler and normalizes bridge/server IDs; it does not change feature flags or security settings.
 - Codex URL shape is verified against its installed URL parser and unit tests. Its button was exercised, but the computer-use tool explicitly refused access to `com.openai.codex`; **visual destination verification remains blocked**. No alternate UI-capture method was used.
 - No automatic import/resume fallback is used for unlinked terminal conversations. Remote Codex navigation remains unavailable until host identities are mapped. Destination accounts and removed sessions remain app-owned access checks.
+
+## Status colors — 0.1.2
+
+- Active work uses a solid lavender card with white text and icons. Questions, approvals, failures and results awaiting review use yellow; finished/reviewed turns use green; waiting, idle, interrupted and uncertain states use grey. Pins retain their status color.
+- Lavender action buttons now use white labels throughout cards and Details. The deeper lavender has a calculated 4.81:1 contrast against white. Empty-state and transcript surfaces are neutral grey.
+- Added a compact four-color legend to Connections. The header attention count and collector-health indicator also reflect their meanings.
+- Release build and signature verification passed; all **18 existing tests passed**. No new tests were added for the styling change. Visual inspection of the running native app confirmed the legend and real active, finished and uncertain cards, including white labels on lavender.

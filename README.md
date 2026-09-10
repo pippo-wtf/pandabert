@@ -1,6 +1,8 @@
-# Pulse 0.1.1 — local preview
+# Pulse 0.1.2 — local preview
 
 A small native macOS attention panel for Claude Code and Codex. The approved Attention design uses a white surface, near-black toolbar and lavender accents. The panel stays above ordinary windows, follows Spaces and can be reopened from the menu bar.
+
+Status colors: **lavender** for active work (white text), **yellow** for questions, approvals, failures and results awaiting your review, **green** for finished/reviewed turns, and **grey** for waiting, idle, interrupted or uncertain activity. Pins preserve the task's status color. A color legend is available in Connections.
 
 ## What works in this version
 

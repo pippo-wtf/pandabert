@@ -19,8 +19,8 @@ cat > "$pulse_app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleDisplayName</key><string>Pulse</string>
 <key>CFBundleExecutable</key><string>Pulse</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.1.1</string>
-<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>0.1.2</string>
+<key>CFBundleVersion</key><string>3</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
@@ -29,5 +29,5 @@ PLIST
 codesign --force --sign - "$pulse_app/Contents/Resources/pulse-agent"
 codesign --force --sign - "$pulse_app"
 codesign --verify --strict "$pulse_app"
-ditto -c -k --keepParent "$pulse_app" "$PWD/dist/Pulse-0.1.1-macos-arm64.zip"
+ditto -c -k --keepParent "$pulse_app" "$PWD/dist/Pulse-0.1.2-macos-arm64.zip"
 echo "Packaged: $pulse_app"
