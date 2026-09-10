@@ -37,6 +37,34 @@ final class ThreadLinkTests: XCTestCase {
             XCTAssertNil(ThreadLink(session: s, localMachineID: "remote").url)
         }
     }
+    func testExplicitTerminalProvenanceSurvivesBridgeOnlyRecords() {
+        var r = SessionReducer(session(.claude))
+        r.apply(["type": "user", "sessionId": id, "entrypoint": "cli", "bridgeSessionId": "cse_example"])
+        r.apply(["type": "assistant", "sessionId": id, "bridgeSessionId": "cse_example"])
+        let link = ThreadLink(session: r.session, localMachineID: r.session.machineID)
+        XCTAssertTrue(link.isTerminalSession)
+        XCTAssertNil(link.url)
+        XCTAssertTrue(link.explanation.contains("Test Mac"))
+        // An explicit desktop mapping still makes this existing conversation navigable.
+        var mapped = r.session; mapped.desktopSessionID = "local_" + id
+        XCTAssertNotNil(ThreadLink(session: mapped, localMachineID: mapped.machineID).url)
+    }
+    func testMissingDesktopMappingIsNotEvidenceOfTerminalOrigin() {
+        var r = SessionReducer(session(.claude))
+        XCTAssertFalse(ThreadLink(session: r.session, localMachineID: r.session.machineID).isTerminalSession)
+        r.apply(["type": "user", "entrypoint": "claude-desktop", "bridgeSessionId": "cse_example"])
+        let link = ThreadLink(session: r.session, localMachineID: r.session.machineID)
+        XCTAssertNil(link.url)
+        XCTAssertFalse(link.isTerminalSession)
+    }
+    func testParentOriginDoesNotMislabelForkAndExplicitOriginCanChange() {
+        var r = SessionReducer(session(.claude))
+        r.apply(["type": "user", "sessionId": UUID().uuidString, "entrypoint": "cli"])
+        XCTAssertEqual(r.session.entrypoint, "Local session")
+        r.apply(["type": "user", "sessionId": id, "entrypoint": "cli"])
+        r.apply(["type": "user", "sessionId": id, "entrypoint": "claude-desktop"])
+        XCTAssertEqual(r.session.entrypoint, "Desktop Code")
+    }
     func testClickRevalidatesDeletedAndChangedDesktopRecords() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

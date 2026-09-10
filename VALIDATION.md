@@ -142,3 +142,12 @@ Validation:
 - All 42 tests passed. Release packaging and local signature verification passed. The real PandaBert app launched, and native sample inspection confirmed the full name and subline fit the existing compact header.
 - The UI automation adapter returned AXError.notImplemented for a window-edge drag. The height-cap removal is verified in the built source; an interactive drag beyond the old limit was not verified in this environment.
 - GitHub repository renamed to pippo-wtf/pandabert and confirmed public. Source repository visibility and user data scope did not change.
+
+
+## Terminal session information — 0.3.1
+
+- Attempted to inspect macOS Terminal through the computer-control tool; it denied access to that app for safety reasons. Direct terminal-tab focusing was therefore not verified or integrated, and no alternate UI-control mechanism was used.
+- Added explicit Claude transcript entrypoint handling: `cli` identifies terminal origin and `claude-desktop` identifies desktop origin. Bridge IDs no longer imply desktop origin. Missing origin metadata remains unknown; inherited parent records cannot supply the fork's origin.
+- Unlinked terminal tasks show a quiet, noninteractive **Terminal session** label in cards and Details. A valid local desktop mapping still enables navigation. Existing unsupported desktop/unknown and remote routing behavior remains intact.
+- All **45 tests passed**, including terminal records with bridge IDs, absent desktop mappings, inherited fork provenance, and an explicit origin change. Release packaging and local signature verification passed. Output: `.build/test-results-0.3.1.txt` and `.build/package-results-0.3.1.txt`.
+- A real local collector snapshot identified six explicit terminal sessions with no desktop mappings. The running packaged app displayed the information label for the recent Claude CLI session; native accessibility inspection confirmed it was text rather than a disabled button, and visual inspection confirmed the label and explanation in Details. No prompt was submitted and no session was resumed/imported. Live user content was not added to public screenshots or test fixtures.

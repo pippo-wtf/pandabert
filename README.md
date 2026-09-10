@@ -8,7 +8,7 @@ PandaBert is a small native macOS panel for people working across Claude Code an
 
 Previously called Panda and Pulse. Existing settings and pins carry over.
 
-**Current version: 0.3.0 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.3.1 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="PandaBert attention panel with a pinned working task and a task that needs an answer" width="364">

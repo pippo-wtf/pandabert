@@ -108,7 +108,13 @@ public struct SessionReducer {
         if let id = o["sessionId"] as? String, id.caseInsensitiveCompare(session.nativeID) != .orderedSame { return }
         metadata(o)
         if o["isSidechain"] as? Bool == true { session.sidechain = true }
-        if let id = o["bridgeSessionId"] as? String, !id.isEmpty { session.entrypoint = "Desktop Code"; session.bridgeSessionID = id }
+        if let id = o["bridgeSessionId"] as? String, !id.isEmpty { session.bridgeSessionID = id }
+        // A CLI session can also have a bridge ID. Only explicit provenance identifies its UI.
+        switch o["entrypoint"] as? String {
+        case "cli": session.entrypoint = "Terminal"
+        case "claude-desktop": session.entrypoint = "Desktop Code"
+        default: break
+        }
         let kind = o["type"] as? String ?? ""
         let at = Self.date(o["timestamp"]) ?? .distantPast
         if kind == "custom-title", let name = o["customTitle"] as? String, !name.isEmpty { session.title = clipped(name, 120); return }

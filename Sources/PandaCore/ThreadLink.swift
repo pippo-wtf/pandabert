@@ -4,7 +4,9 @@ public struct ThreadLink {
     public let url: URL?
     public let bundleID: String
     public let explanation: String
+    public let isTerminalSession: Bool
     public init(session: Session, localMachineID: String) {
+        isTerminalSession = session.entrypoint == "Terminal"
         bundleID = session.provider == .codex ? "com.openai.codex" : "com.anthropic.claudefordesktop"
         let isLocal = session.machineID == localMachineID
         if session.provider == .codex {
@@ -17,6 +19,10 @@ public struct ThreadLink {
             explanation = "Open this existing Claude desktop conversation."
         } else {
             url = nil
+            if isTerminalSession {
+                explanation = "Terminal session on \(session.machine). PandaBert observes its activity, but cannot reliably identify and focus its existing terminal tab."
+                return
+            }
             explanation = isLocal ? "No matching Claude desktop conversation was found on this Mac. A terminal or bridge ID alone cannot open a chat." : "This session lives on \(session.machine) and has no linked Claude desktop conversation."
         }
     }

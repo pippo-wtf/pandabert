@@ -131,9 +131,17 @@ struct OpenThreadButton: View {
     let session: Session
     var body: some View {
         let link = ThreadLink(session: session, localMachineID: store.localMachineID)
-        Button { store.openThread(session) } label: {
-            Label("Open thread", systemImage: "arrow.up.right").font(.system(size: 10, weight: .semibold)).padding(.horizontal, 12).padding(.vertical, 8).foregroundStyle(link.url != nil ? .white : ink).background(link.url == nil ? Color.gray.opacity(0.15) : lavender, in: Capsule())
-        }.buttonStyle(.plain).disabled(link.url == nil).help(link.explanation).accessibilityLabel("Open \(session.title) in \(session.provider.label)")
+        if link.url == nil && link.isTerminalSession {
+            Label("Terminal session", systemImage: "terminal")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(.vertical, 8)
+                .help(link.explanation)
+        } else {
+            Button { store.openThread(session) } label: {
+                Label("Open thread", systemImage: "arrow.up.right").font(.system(size: 10, weight: .semibold)).padding(.horizontal, 12).padding(.vertical, 8).foregroundStyle(link.url != nil ? .white : ink).background(link.url == nil ? Color.gray.opacity(0.15) : lavender, in: Capsule())
+            }.buttonStyle(.plain).disabled(link.url == nil).help(link.explanation).accessibilityLabel("Open \(session.title) in \(session.provider.label)")
+        }
     }
 }
 
