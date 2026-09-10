@@ -45,3 +45,9 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Lavender action buttons now use white labels throughout cards and Details. The deeper lavender has a calculated 4.81:1 contrast against white. Empty-state and transcript surfaces are neutral grey.
 - Added a compact four-color legend to Connections. The header attention count and collector-health indicator also reflect their meanings.
 - Release build and signature verification passed; all **18 existing tests passed**. No new tests were added for the styling change. Visual inspection of the running native app confirmed the legend and real active, finished and uncertain cards, including white labels on lavender.
+
+## Subtle status dots — 0.1.3
+
+- Restored neutral cards and the original lavender accent. Only the small status dots carry active/attention/finished/waiting colors; the legend also uses dots rather than colored pills.
+- Lavender button and toolbar-pill labels remain white. Pins use a subtle outline without changing card backgrounds.
+- Release build and local signature verification passed. Status classification is unchanged from 0.1.2; this revision adjusts presentation only.

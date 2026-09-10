@@ -4,7 +4,8 @@ import PulseCore
 import ServiceManagement
 
 let ink = Color(red: 0.098, green: 0.094, blue: 0.125)
-let lavender = Color(red: 0.475, green: 0.380, blue: 0.788)
+let lavender = Color(red: 0.608, green: 0.529, blue: 0.961)
+let neutralSurface = Color(white: 0.97)
 
 struct PanelView: View {
     @ObservedObject var store: PulseStore
@@ -30,7 +31,7 @@ struct PanelView: View {
                 } label: {
                     HStack(spacing: 4) { Text(project.isEmpty ? "All projects" : store.sessions.first(where: { $0.projectKey == project }).map { store.preferences.projectName($0) } ?? "Project").lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 8)) }.font(.system(size: 10))
                 }.menuStyle(.borderlessButton).environment(\.colorScheme, .dark).fixedSize().frame(maxWidth: 105)
-                Text("\(needsCount) need you").font(.system(size: 10, weight: .semibold)).foregroundStyle(needsCount > 0 ? StatusTone.attention.accent : StatusTone.quiet.accent).padding(.horizontal, 9).padding(.vertical, 7).background(needsCount > 0 ? StatusTone.attention.background : StatusTone.quiet.background, in: Capsule())
+                Text("\(needsCount) need you").font(.system(size: 10, weight: .semibold)).foregroundStyle(.white).padding(.horizontal, 9).padding(.vertical, 7).background(lavender, in: Capsule())
             }.foregroundStyle(.white).padding(.horizontal, 13).frame(height: 43).background(ink, in: Capsule()).padding(16)
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -56,7 +57,7 @@ struct PanelView: View {
                             Image(systemName: "sparkle").foregroundStyle(lavender).font(.system(size: 22))
                             Text(store.sessions.isEmpty ? "Your activity will appear here." : "Nothing needs your attention here.").font(.system(size: 13, weight: .medium))
                             Text(store.sessions.isEmpty ? "Add your profile folders in Connections. Pulse observes Claude Code and Codex logs on this Mac." : "Keep this panel nearby. Pin any task you want to keep in sight.").font(.system(size: 11)).foregroundStyle(.secondary)
-                        }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(StatusTone.quiet.background, in: RoundedRectangle(cornerRadius: 17))
+                        }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
                     }
                     Button { expanded.toggle() } label: {
                         HStack { Circle().fill(working > 0 ? lavender : StatusTone.quiet.accent).frame(width: 6, height: 6); Text("In the background").fontWeight(.medium); Spacer(); Text("\(store.background.count)").foregroundStyle(.secondary); Image(systemName: expanded ? "chevron.up" : "chevron.down") }.font(.system(size: 11)).padding(.vertical, 13)
@@ -94,37 +95,36 @@ struct PanelView: View {
             HStack {
                 Text(store.preferences.projectName(s)).font(.system(size: 10, weight: .semibold)).lineLimit(1)
                 Spacer()
-                Text(s.provider.label).font(.system(size: 9)).foregroundStyle(tone.secondary)
-                Button { store.pin(s) } label: { Image(systemName: pinned ? "pin.fill" : "pin").font(.system(size: 11)).foregroundStyle(pinned ? tone.accent : tone.secondary).frame(width: 22, height: 22) }.buttonStyle(.plain).help(pinned ? "Unpin task" : "Pin important task").accessibilityLabel(pinned ? "Unpin \(s.title)" : "Pin \(s.title)")
+                Text(s.provider.label).font(.system(size: 9)).foregroundStyle(.secondary)
+                Button { store.pin(s) } label: { Image(systemName: pinned ? "pin.fill" : "pin").font(.system(size: 11)).foregroundStyle(pinned ? lavender : ink.opacity(0.45)).frame(width: 22, height: 22) }.buttonStyle(.plain).help(pinned ? "Unpin task" : "Pin important task").accessibilityLabel(pinned ? "Unpin \(s.title)" : "Pin \(s.title)")
             }
             Button { selected = s } label: {
                 VStack(alignment: .leading, spacing: 7) {
                     Text(s.title).font(.system(size: 14, weight: .medium)).tracking(-0.2).lineLimit(2).multilineTextAlignment(.leading)
-                    HStack(spacing: 5) { Circle().fill(tone.accent).frame(width: 5, height: 5); Text(appearance.label).lineLimit(2) }.font(.system(size: 10)).foregroundStyle(tone.accent)
-                    Text("\(s.machine) · \(s.profileLabel)").font(.system(size: 9)).foregroundStyle(tone.secondary).lineLimit(1)
+                    HStack(spacing: 5) { Circle().fill(tone.accent).frame(width: 5, height: 5); Text(appearance.label).lineLimit(2) }.font(.system(size: 10)).foregroundStyle(.secondary)
+                    Text("\(s.machine) · \(s.profileLabel)").font(.system(size: 9)).foregroundStyle(.secondary).lineLimit(1)
                 }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
             }.buttonStyle(.plain)
             Group {
                 HStack {
-                    OpenThreadButton(store: store, session: s, onLavender: tone == .active)
-                    Button("Details") { selected = s }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(tone.secondary)
+                    OpenThreadButton(store: store, session: s)
+                    Button("Details") { selected = s }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(.secondary)
                     Spacer()
-                    if attention && s.activity == .finished { Button("Reviewed") { store.reviewed(s) }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(tone.secondary) }
+                    if attention && s.activity == .finished { Button("Reviewed") { store.reviewed(s) }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(.secondary) }
                 }.padding(.top, 2)
             }
-        }.foregroundStyle(tone.text).padding(14).background(tone.background, in: RoundedRectangle(cornerRadius: 17))
-            .overlay(RoundedRectangle(cornerRadius: 17).stroke(pinned ? tone.accent.opacity(0.55) : .clear, lineWidth: 1))
+        }.foregroundStyle(ink).padding(14).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
+            .overlay(RoundedRectangle(cornerRadius: 17).stroke(pinned ? lavender.opacity(0.35) : .clear, lineWidth: 1))
     }
 }
 
 struct OpenThreadButton: View {
     @ObservedObject var store: PulseStore
     let session: Session
-    var onLavender = false
     var body: some View {
         let link = ThreadLink(session: session, localMachineID: store.localMachineID)
         Button { store.openThread(session) } label: {
-            Label("Open thread", systemImage: "arrow.up.right").font(.system(size: 10, weight: .semibold)).padding(.horizontal, 12).padding(.vertical, 8).foregroundStyle(link.url != nil || onLavender ? .white : ink).background(link.url == nil ? Color.gray.opacity(0.15) : onLavender ? .black.opacity(0.12) : lavender, in: Capsule())
+            Label("Open thread", systemImage: "arrow.up.right").font(.system(size: 10, weight: .semibold)).padding(.horizontal, 12).padding(.vertical, 8).foregroundStyle(link.url != nil ? .white : ink).background(link.url == nil ? Color.gray.opacity(0.15) : lavender, in: Capsule())
         }.buttonStyle(.plain).disabled(link.url == nil).help(link.explanation).accessibilityLabel("Open \(session.title) in \(session.provider.label)")
     }
 }
@@ -142,12 +142,12 @@ struct DetailView: View {
             HStack { Text(store.preferences.projectName(s)).font(.headline); Spacer(); Button("Done") { dismiss() } }
             Text(s.title).font(.title3.weight(.semibold)).textSelection(.enabled)
             let appearance = StatusAppearance(s, preferences: store.preferences)
-            Text(appearance.label).font(.caption.weight(.medium)).padding(.horizontal, 10).padding(.vertical, 6).foregroundStyle(appearance.tone.accent).background(appearance.tone.background, in: Capsule())
+            HStack(spacing: 6) { Circle().fill(appearance.tone.accent).frame(width: 6, height: 6); Text(appearance.label).font(.caption).foregroundStyle(.secondary) }
             OpenThreadButton(store: store, session: s)
             if ThreadLink(session: s, localMachineID: store.localMachineID).url == nil { Text(ThreadLink(session: s, localMachineID: store.localMachineID).explanation).font(.caption).foregroundStyle(.secondary) }
             Text("\(s.provider.label) · \(s.machine) · \(s.profileLabel)\n\(s.reason)").font(.caption).foregroundStyle(.secondary)
             Text("Last activity: \(s.lastActivityEvent.formatted(date: .abbreviated, time: .shortened))").font(.caption).foregroundStyle(.secondary)
-            ScrollView { Text(s.excerpt.isEmpty ? "No message excerpt available. Open the original session for full context." : s.excerpt).font(.system(size: 12)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(12) }.frame(minHeight: 130, maxHeight: 210).background(StatusTone.quiet.background, in: RoundedRectangle(cornerRadius: 12))
+            ScrollView { Text(s.excerpt.isEmpty ? "No message excerpt available. Open the original session for full context." : s.excerpt).font(.system(size: 12)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(12) }.frame(minHeight: 130, maxHeight: 210).background(neutralSurface, in: RoundedRectangle(cornerRadius: 12))
             if let pr = s.pullRequest { Button(pr.label + " ↗") { if let url = URL(string: pr.url), url.scheme == "https", url.host == "github.com" { NSWorkspace.shared.open(url) } }.buttonStyle(.link) }
             TextField("Waiting for… (person or dependency)", text: $waiting)
             TextField("Project display name", text: $alias)
@@ -188,7 +188,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 13) {
                     HStack(spacing: 6) {
                         ForEach(StatusTone.allCases, id: \.self) { tone in
-                            Text(tone.label).font(.system(size: 10, weight: .medium)).padding(.horizontal, 9).padding(.vertical, 6).foregroundStyle(tone.accent).background(tone.background, in: Capsule())
+                            HStack(spacing: 5) { Circle().fill(tone.accent).frame(width: 6, height: 6); Text(tone.label).font(.system(size: 10)).foregroundStyle(.secondary) }.padding(.trailing, 6)
                         }
                     }
                     Toggle("Keep the panel above other windows", isOn: $store.preferences.alwaysOnTop).onChange(of: store.preferences.alwaysOnTop) { _ in store.save() }

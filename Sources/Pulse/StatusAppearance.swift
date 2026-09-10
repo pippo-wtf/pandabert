@@ -6,24 +6,14 @@ enum StatusTone: CaseIterable {
     var label: String {
         switch self { case .active: return "Active"; case .attention: return "Needs you"; case .complete: return "Finished"; case .quiet: return "Waiting / idle" }
     }
-    var background: Color {
-        switch self {
-        case .active: return lavender
-        case .attention: return Color(red: 1, green: 0.958, blue: 0.827)
-        case .complete: return Color(red: 0.914, green: 0.962, blue: 0.929)
-        case .quiet: return Color(red: 0.954, green: 0.954, blue: 0.964)
-        }
-    }
     var accent: Color {
         switch self {
-        case .active: return .white
-        case .attention: return Color(red: 0.49, green: 0.35, blue: 0.03)
-        case .complete: return Color(red: 0.18, green: 0.43, blue: 0.29)
-        case .quiet: return Color(red: 0.43, green: 0.43, blue: 0.48)
+        case .active: return lavender
+        case .attention: return Color(red: 0.89, green: 0.69, blue: 0.19)
+        case .complete: return Color(red: 0.29, green: 0.62, blue: 0.42)
+        case .quiet: return Color(red: 0.55, green: 0.55, blue: 0.60)
         }
     }
-    var text: Color { self == .active ? .white : ink }
-    var secondary: Color { self == .active ? .white.opacity(0.85) : ink.opacity(0.62) }
 }
 
 struct StatusAppearance {
