@@ -23,8 +23,8 @@ cat > "$panda_app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleExecutable</key><string>PandaBert</string>
 <key>CFBundleIconFile</key><string>Panda</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.4.5</string>
-<key>CFBundleVersion</key><string>21</string>
+<key>CFBundleShortVersionString</key><string>0.4.6</string>
+<key>CFBundleVersion</key><string>22</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
@@ -40,6 +40,6 @@ fi
 codesign "${panda_sign_args[@]}" "$panda_app/Contents/Resources/panda-agent"
 codesign "${panda_sign_args[@]}" "$panda_app"
 codesign --verify --strict "$panda_app"
-ditto -c -k --keepParent "$panda_app" "$PWD/dist/PandaBert-0.4.5-macos-arm64.zip"
+ditto -c -k --keepParent "$panda_app" "$PWD/dist/PandaBert-0.4.6-macos-arm64.zip"
 if [ ! -e "$PWD/dist/Panda.app" ]; then ln -sfn PandaBert.app "$PWD/dist/Panda.app"; fi
 echo "Packaged: $panda_app"

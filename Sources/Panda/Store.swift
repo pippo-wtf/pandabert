@@ -77,6 +77,7 @@ final class PandaStore: ObservableObject {
         refresh()
     }
     func pin(_ session: Session) {
+        guard !preferences.isCardDeleted(session.id) else { return }
         pendingUnpins.removeValue(forKey: session.id)?.cancel()
         let wasPinned = preferences.pins.contains(session.id)
         preferences.togglePin(session.id)
@@ -103,6 +104,7 @@ final class PandaStore: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: returnToAttention)
     }
     func reviewed(_ session: Session) {
+        guard !preferences.isCardDeleted(session.id) else { return }
         pendingUnpins.removeValue(forKey: session.id)?.cancel()
         if preferences.pins.contains(session.id) {
             preferences.reviewed[session.id] = session.completionKey
@@ -118,13 +120,43 @@ final class PandaStore: ObservableObject {
             updateArrival(sessions)
         }
     }
+    func deleteCard(_ session: Session) throws {
+        guard preferenceError == nil && !needsSetup else { throw PandaError.message("Saved settings are unavailable. The card was not deleted.") }
+        var next = preferences
+        next.deletedCardIDs = (next.deletedCardIDs ?? []).union([session.id])
+        next.pins.removeAll { $0 == session.id }
+        next.releaseUnpinnedCard(session.id)
+        // Commit the exclusion first, so failed writes cannot silently lose the deletion on restart.
+        try PandaPaths.save(next, to: root.appendingPathComponent("preferences.json"))
+        pendingUnpins.removeValue(forKey: session.id)?.cancel()
+        withAnimation(.easeOut(duration: 0.2)) {
+            preferences = next
+            sessions.removeAll { $0.id == session.id }
+            cardPresses.removeValue(forKey: session.id)
+            pinnedCache.removeAll { $0.id == session.id }
+            updateArrival(sessions)
+        }
+        // A stale cache cannot resurrect the card: the saved exclusion remains authoritative.
+        do { try PandaPaths.save(pinnedCache, to: root.appendingPathComponent("pinned-sessions.json")) }
+        catch { issues.append("Could not update the card cache: \(error.localizedDescription)") }
+        refresh()
+    }
+    func restoreDeletedCards() throws {
+        guard preferenceError == nil && !needsSetup else { throw PandaError.message("Saved settings are unavailable.") }
+        var next = preferences; next.deletedCardIDs = nil
+        try PandaPaths.save(next, to: root.appendingPathComponent("preferences.json"))
+        preferences = next
+        refresh(force: true)
+    }
+
     func openThread(_ session: Session) {
+        guard !preferences.isCardDeleted(session.id) else { return }
         let link = ThreadLink.revalidated(session: session, localMachineID: localMachineID)
         guard let url = link.url else { navigationError = link.explanation; return }
         navigationError = nil
         openConversation(url, link.bundleID) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else { return }
+                guard let self, !self.preferences.isCardDeleted(session.id) else { return }
                 switch result {
                 case .failure:
                     self.navigationError = "Could not open \(session.provider.label). Try opening the app and signing in first."
@@ -163,8 +195,9 @@ final class PandaStore: ObservableObject {
                 guard let self else { return }
                 self.localMachineID = update.localMachineID
                 self.arrivalTracker.establishBaseline(update.baselineSessions, preferences: self.preferences)
-                self.updateArrival(update.sessions)
-                self.sessions = update.sessions; self.coverage = update.coverage; self.issues = update.issues
+                let visible = update.sessions.filter { !self.preferences.isCardDeleted($0.id) }
+                self.updateArrival(visible)
+                self.sessions = visible; self.coverage = update.coverage; self.issues = update.issues
                 self.refreshed = update.refreshed
                 if update.refreshed != nil || !update.issues.isEmpty { self.loading = false }
             }

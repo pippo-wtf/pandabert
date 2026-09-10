@@ -24,7 +24,7 @@ Optional identity fields preserve decoding of existing PandaBert snapshots and p
 
 ## Validation
 
-The full suite passes: **62 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
+The full suite passes: **65 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
 
 The release app and embedded collector were rebuilt and locally signature-verified. Live navigation results are recorded in `VALIDATION.md`.
 
@@ -45,3 +45,7 @@ Acknowledged cards leave Needs you with a 0.3-second rubber-band motion: a short
 ## Pins and kept cards — 0.4.4
 
 Pin changes and pinned acknowledgements use a brief press-in animation without an exit. The card list preserves each card's identity when it moves into the pinned group. Unpinning pauses in place for 350 ms, then gently returns an unseen card that still needs attention to Needs you. Repinning or acknowledging during the pause cancels that return. Already-seen cards retain their position in Kept in sight until a later Mark as seen or successful Open thread acknowledgement; that retained order survives relaunches and observation outages. Failed opens and delayed callbacks for older completions do not release it. Pinned cards stay pinned after either action. Existing attention rules for questions and independent GitHub alerts remain unchanged. Reduced Motion disables the press movement.
+
+## Delete card — 0.4.6
+
+Details includes Delete card for any card, including pinned, seen and unavailable cards. Deletion persists the exact PandaBert card ID before changing the interface, removes its pin/retained position and cached copy, cancels pending unpin movement, and excludes it from subsequent observation updates. Later activity for that same card remains hidden until restored. Failed persistence keeps the card visible and reports an error. Delayed navigation callbacks cannot mark a deleted card seen or bring it back. The original Claude/Codex session and transcript are never deleted or edited. Connections → Restore deleted cards clears all exclusions; only cards still within observation coverage return, without their old pins.

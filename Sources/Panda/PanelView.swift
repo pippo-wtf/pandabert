@@ -65,7 +65,7 @@ struct PanelView: View {
                             card(s, pinned: store.preferences.pins.contains(s.id))
                                 .modifier(CardPress(progress: Double(store.cardPresses[s.id, default: 0]), reduceMotion: reduceMotion))
                                 .animation(.easeInOut(duration: 0.22), value: store.cardPresses[s.id, default: 0])
-                        }.zIndex(1).transition(SeenDismissal.transition(reduceMotion: reduceMotion))
+                        }.zIndex(1).transition(store.preferences.pins.contains(s.id) ? .opacity : SeenDismissal.transition(reduceMotion: reduceMotion))
                     }
                     if visibleAttention.count > 8 && !showAll { Button("Show \(visibleAttention.count - 8) more") { showAll = true }.buttonStyle(.plain).foregroundStyle(lavender).padding(8) }
                     if visibleAttention.isEmpty && !store.loading {
@@ -183,6 +183,7 @@ struct DetailView: View {
     @State private var waiting = ""
     @State private var alias = ""
     @State private var prURL = ""
+    @State private var deletionError: String?
     var s: Session { store.sessions.first { $0.id == original.id } ?? original }
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
@@ -213,8 +214,22 @@ struct DetailView: View {
                     Button("Reveal transcript") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: s.sourcePath)]) }
                 }
             }
+            HStack {
+                Button(role: .destructive) {
+                    do { try store.deleteCard(s); dismiss() }
+                    catch { deletionError = "Could not save the deletion. " + error.localizedDescription }
+                } label: { Label("Delete card", systemImage: "trash") }
+                    .buttonStyle(.plain).foregroundStyle(.red)
+                    .help("Remove from PandaBert only. The original conversation stays in Claude or Codex.")
+                Spacer()
+            }
+            Text("Removes this card from PandaBert only. Restore deleted cards in Connections.")
+                .font(.system(size: 10)).foregroundStyle(.secondary)
             Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; PandaBert does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
         }.padding(22).frame(width: 390).onAppear { waiting = store.preferences.waits[s.id] ?? ""; alias = store.preferences.projectName(s) }
+            .alert("Could not delete card", isPresented: Binding(get: { deletionError != nil }, set: { if !$0 { deletionError = nil } })) {
+                Button("OK") { deletionError = nil }
+            } message: { Text(deletionError ?? "") }
             .onChange(of: store.preferences.reviewed[s.id]) { seen in
                 if s.activity == .finished && seen == s.completionKey { dismiss() }
             }
@@ -243,6 +258,12 @@ struct SettingsView: View {
                         }
                     }
                     Button("Run setup wizard") { setup = true }
+                    if let deleted = store.preferences.deletedCardIDs, !deleted.isEmpty {
+                        Button("Restore deleted cards (\(deleted.count))") {
+                            do { try store.restoreDeletedCards(); settingsMessage = "Deleted cards will return if their activity is still available." }
+                            catch { settingsMessage = "Could not restore cards: " + error.localizedDescription }
+                        }
+                    }
                     Toggle("Keep the panel above other windows", isOn: $store.preferences.alwaysOnTop).onChange(of: store.preferences.alwaysOnTop) { _ in store.save() }
                     Toggle("Open PandaBert when I log in", isOn: Binding(get: { startsAtLogin }, set: { enabled in
                         do {

@@ -178,4 +178,53 @@ final class ThreadSeenTests: XCTestCase {
         XCTAssertTrue(store.attention.isEmpty)
     }
 
+    func testDeletePersistsAcrossRefreshAndRestartWithoutChangingTranscript() throws {
+        let store = try makeStore { _, _, _ in }
+        let s = try observeFinishedTask(store)
+        let source = URL(fileURLWithPath: s.sourcePath)
+        let bytes = try Data(contentsOf: source)
+        store.pin(s)
+        try store.deleteCard(s)
+        XCTAssertFalse(store.sessions.contains { $0.id == s.id })
+        XCTAssertFalse(store.preferences.pins.contains(s.id))
+        XCTAssertFalse(store.preferences.keptCardIDs.contains(s.id))
+        XCTAssertTrue(try XCTUnwrap(PreferencesFile.load(root: store.root)).isCardDeleted(s.id))
+        store.refresh(force: true); waitForUnpinPause()
+        XCTAssertFalse(store.sessions.contains { $0.id == s.id })
+        let restarted = PandaStore(root: store.root, openConversation: { _, _, _ in })
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in !restarted.loading }, object: nil)
+        wait(for: [ready], timeout: 3)
+        XCTAssertFalse(restarted.sessions.contains { $0.id == s.id })
+        XCTAssertEqual(try Data(contentsOf: source), bytes)
+        try restarted.restoreDeletedCards()
+        let restored = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in restarted.sessions.contains { $0.id == s.id } }, object: nil)
+        wait(for: [restored], timeout: 3)
+        XCTAssertFalse(restarted.preferences.pins.contains(s.id))
+    }
+
+    func testFailedDeleteDoesNotRemoveCardOrPin() throws {
+        let store = try makeStore { _, _, _ in }
+        let s = try observeFinishedTask(store); store.pin(s)
+        let preferencesFile = store.root.appendingPathComponent("preferences.json")
+        try FileManager.default.removeItem(at: preferencesFile)
+        try FileManager.default.createDirectory(at: preferencesFile, withIntermediateDirectories: false)
+        XCTAssertThrowsError(try store.deleteCard(s))
+        XCTAssertTrue(store.sessions.contains { $0.id == s.id })
+        XCTAssertTrue(store.preferences.pins.contains(s.id))
+        XCTAssertFalse(store.preferences.isCardDeleted(s.id))
+    }
+
+    func testDeleteDuringPendingUnpinAndOpenCannotResurrectCard() throws {
+        var callback: ((Result<Void, Error>) -> Void)?
+        let store = try makeStore { _, _, completion in callback = completion }
+        let s = try observeFinishedTask(store)
+        store.pin(s); store.pin(s); store.openThread(s)
+        try store.deleteCard(s)
+        try XCTUnwrap(callback)(.success(())); drainCallback()
+        waitForUnpinPause()
+        XCTAssertFalse(store.sessions.contains { $0.id == s.id })
+        XCTAssertFalse(store.preferences.keptCardIDs.contains(s.id))
+        XCTAssertNil(store.preferences.reviewed[s.id])
+    }
+
 }

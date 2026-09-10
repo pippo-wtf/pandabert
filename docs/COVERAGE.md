@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-PandaBert 0.4.5 is a local preview. These limits describe the implementation, not a promise of future delivery.
+PandaBert 0.4.6 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Collection behavior
 
@@ -21,7 +21,7 @@ PandaBert 0.4.5 is a local preview. These limits describe the implementation, no
 
 ## Validation status
 
-The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 62 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
+The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 65 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
 
 [Back to the overview](../README.md)
 
