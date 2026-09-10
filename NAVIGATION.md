@@ -1,6 +1,6 @@
 # Open thread — PandaBert
 
-Task cards and the details sheet offer **Open thread** for supported navigation. Explicitly identified, unlinked terminal sessions show a quiet **Terminal session** information label instead. Task details remain available separately. Navigation does not mark work reviewed or submit a prompt.
+Task cards and the details sheet offer **Open thread** for supported navigation. Explicitly identified, unlinked terminal sessions show a quiet **Terminal session** information label instead. Task details remain available separately. Opening a finished response marks that response as seen in PandaBert once macOS successfully hands the link to the destination app. Navigation never submits a prompt.
 
 ## Routing evidence
 
@@ -24,10 +24,16 @@ Optional identity fields preserve decoding of existing PandaBert snapshots and p
 
 ## Validation
 
-The full suite passes: **45 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
+The full suite passes: **55 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
 
 The release app and embedded collector were rebuilt and locally signature-verified. Live navigation results are recorded in `VALIDATION.md`.
 
 ## Terminal focus attempt — 0.3.1
 
 The computer-control tool denied access to macOS Terminal, so focusing the user's existing tab could not be tested. No alternate UI-control mechanism was used. This is a verification limitation, not evidence that terminal integration is impossible. The fallback does not activate a generic terminal window, import a conversation or start another session. Explicit entrypoint metadata was verified in local Claude transcripts, including a CLI record that also had a bridge ID.
+
+## Seen on open — 0.4.2
+
+**Mark as seen** is an explicit bordered button in task cards and Details. It acknowledges only that completed response; the background status reads **Seen**. Opening a finished thread performs the same acknowledgement after the operating system reports a successful app handoff. Missing links, failed app opens, active turns and unanswered questions are not acknowledged. A delayed callback cannot acknowledge a newer completion or replace its existing seen marker. Pins are retained, and new completions can need attention again. Independent GitHub failures/change requests still need attention.
+
+The acknowledgement means the link was handed to the app, not that PandaBert verified the destination screen or that a human read the response. Provider account-access errors occurring inside the destination app are not reported by macOS. PandaBert neither reviews nor approves a GitHub pull request.

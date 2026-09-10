@@ -118,7 +118,7 @@ struct PanelView: View {
                     OpenThreadButton(store: store, session: s)
                     Button("Details") { selected = s }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(.secondary)
                     Spacer()
-                    if attention && s.activity == .finished { Button("Reviewed") { store.reviewed(s) }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(.secondary) }
+                    if attention && s.activity == .finished && store.preferences.reviewed[s.id] != s.completionKey { MarkSeenButton { store.reviewed(s) } }
                 }.padding(.top, 2)
             }
         }.foregroundStyle(ink).padding(14).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
@@ -128,6 +128,22 @@ struct PanelView: View {
                     AttentionGlow(arrival: arrival)
                 }
             }
+    }
+}
+
+struct MarkSeenButton: View {
+    var action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            Label("Mark as seen", systemImage: "checkmark")
+                .font(.system(size: 10, weight: .medium))
+                .padding(.horizontal, 10).padding(.vertical, 8)
+                .foregroundStyle(ink)
+                .background(Color.white, in: Capsule())
+                .overlay(Capsule().stroke(ink.opacity(0.18), lineWidth: 1))
+                .fixedSize(horizontal: true, vertical: false)
+        }.buttonStyle(.plain)
+            .help("I've seen this response. Clear its finished-turn notification in PandaBert.")
     }
 }
 
@@ -145,7 +161,7 @@ struct OpenThreadButton: View {
         } else {
             Button { store.openThread(session) } label: {
                 Label("Open thread", systemImage: "arrow.up.right").font(.system(size: 10, weight: .semibold)).padding(.horizontal, 12).padding(.vertical, 8).foregroundStyle(link.url != nil ? .white : ink).background(link.url == nil ? Color.gray.opacity(0.15) : lavender, in: Capsule())
-            }.buttonStyle(.plain).disabled(link.url == nil).help(link.explanation).accessibilityLabel("Open \(session.title) in \(session.provider.label)")
+            }.buttonStyle(.plain).disabled(link.url == nil).help(link.explanation + (session.activity == .finished && link.url != nil ? " Opening also marks this response as seen in PandaBert." : "")).accessibilityLabel("Open \(session.title) in \(session.provider.label)")
         }
     }
 }
@@ -178,7 +194,7 @@ struct DetailView: View {
                     store.preferences.projectAliases[s.projectKey] = alias.isEmpty ? nil : PandaCore.clipped(alias, 60); store.save()
                 }
                 Button(store.preferences.pins.contains(s.id) ? "Unpin" : "Pin task") { store.pin(s) }
-                if s.activity == .finished { Button("Mark reviewed") { store.reviewed(s); dismiss() } }
+                if s.activity == .finished && store.preferences.reviewed[s.id] != s.completionKey { MarkSeenButton { store.reviewed(s); dismiss() } }
             }
             Divider()
             HStack {

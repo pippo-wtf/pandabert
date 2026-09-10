@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-public let pandaVersion = "0.4.1"
+public let pandaVersion = "0.4.2"
 public let pandaProtocolVersion = 1
 
 public enum Provider: String, Codable, CaseIterable { case claude, codex

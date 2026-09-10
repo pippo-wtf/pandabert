@@ -6,7 +6,7 @@
 
 PandaBert is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.4.1 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.4.2 · Public preview · Apple Silicon · macOS 13+**
 
 **DISCLAIMER: I'm not a coder, i'm a creative, i work with ai, try to make reviews and keep code clean, but dont expect perfection from the code. Cheers.**
 
@@ -24,10 +24,10 @@ PandaBert gives that scattered work a small, persistent home. Its purpose is to 
 
 ## What you can do
 
-- **See what needs you.** Observed questions and newly completed turns surface in an attention list. Acknowledging a result clears that turn; a later completion can surface again.
+- **See what needs you.** Observed questions and newly completed turns surface in an attention list. Use **Mark as seen**, or open its thread, to clear that finished response; a later completion can surface again.
 - **Notice the newest arrival.** The latest task needing attention gets a soft lavender edge glow for 30 seconds, with a slow breathing cycle and a gentle fade. Regular refreshes do not restart it.
 - **Keep important work pinned.** Pins stay above the attention list and survive relaunches.
-- **Glance at work in progress.** Expand the background section for active, waiting, reviewed and uncertain tasks.
+- **Glance at work in progress.** Expand the background section for active, waiting, seen and uncertain tasks.
 - **Group by project.** Repository identities bring related conversations together. Filter by project and give it a friendlier display name.
 - **Return to the conversation.** Open supported local Codex tasks and mapped Claude desktop sessions. Unavailable Claude links are disabled.
 - **Understand a wait.** Read the latest excerpt, add a person or dependency note, and optionally check linked GitHub pull requests using your existing CLI login.
@@ -39,7 +39,7 @@ PandaBert gives that scattered work a small, persistent home. Its purpose is to 
 | --- | --- |
 | Lavender | Active work observed |
 | Yellow | Needs your attention, such as a question or a result to review |
-| Green | A finished or reviewed turn |
+| Green | A finished or seen turn |
 | Grey | Waiting, idle, interrupted or uncertain activity |
 
 Labels accompany the dots. Cards stay neutral, and lavender controls use white text.
@@ -98,7 +98,7 @@ The app is locally ad-hoc signed; this preview has no notarized installer or aut
 
 ## Current scope
 
-Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **51 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
+Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **55 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
 
 Some important boundaries:
 

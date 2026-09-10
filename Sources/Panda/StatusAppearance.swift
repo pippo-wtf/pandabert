@@ -31,7 +31,7 @@ struct StatusAppearance {
         if activity == .finished {
             tone = .complete
             if let pr = session.pullRequest, pr.isFresh(), ["MERGED", "CLOSED"].contains(pr.state) || pr.review == "APPROVED" { label = pr.label }
-            else { label = preferences.reviewed[session.id] == session.completionKey ? "Reviewed" : "Turn finished" }
+            else { label = preferences.reviewed[session.id] == session.completionKey ? "Seen" : "Turn finished" }
             return
         }
         tone = .quiet; label = activity.label

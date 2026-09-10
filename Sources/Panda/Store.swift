@@ -17,13 +17,15 @@ final class PandaStore: ObservableObject {
     @Published var showSetup = false
     private var arrivalTracker = AttentionArrivalTracker()
     let root: URL
+    private let openConversation: ThreadOpenAction
     private var pipeline: ObservationPipeline?
     private var timer: Timer?
     private var pinnedCache: [Session] = []
     private var preferenceError: String?
     var onTopChanged: ((Bool) -> Void)?
-    init(root: URL = PandaPaths.data) {
+    init(root: URL = PandaPaths.data, openConversation: @escaping ThreadOpenAction = ThreadOpener.open) {
         self.root = root
+        self.openConversation = openConversation
         do {
             if let saved = try PreferencesFile.load(root: root) { preferences = saved }
             else { needsSetup = true; showSetup = true; loading = false; return }
@@ -77,14 +79,25 @@ final class PandaStore: ObservableObject {
     func openThread(_ session: Session) {
         let link = ThreadLink.revalidated(session: session, localMachineID: localMachineID)
         guard let url = link.url else { navigationError = link.explanation; return }
-        guard let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: link.bundleID) else {
-            navigationError = "\(session.provider.label) is not installed or registered on this Mac."; return
-        }
-        let config = NSWorkspace.OpenConfiguration(); config.activates = true
-        NSWorkspace.shared.open([url], withApplicationAt: app, configuration: config) { _, error in
-            if error != nil { DispatchQueue.main.async { self.navigationError = "Could not open \(session.provider.label). Try opening the app and signing in first." } }
+        navigationError = nil
+        openConversation(url, link.bundleID) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                switch result {
+                case .failure:
+                    self.navigationError = "Could not open \(session.provider.label). Try opening the app and signing in first."
+                case .success:
+                    // A delayed callback must not acknowledge a newer response or erase its seen state.
+                    guard session.activity == .finished,
+                          let current = self.sessions.first(where: { $0.id == session.id }),
+                          current.activity == .finished, current.completionKey == session.completionKey,
+                          self.preferences.reviewed[session.id] != session.completionKey else { return }
+                    self.reviewed(session)
+                }
+            }
         }
     }
+
     var attention: [Session] { sessions.filter { preferences.needsAttention($0) && !preferences.pins.contains($0.id) } }
     var pinned: [Session] { preferences.pins.compactMap { id in sessions.first { $0.id == id } } }
     var background: [Session] { sessions.filter { !preferences.needsAttention($0) && !preferences.pins.contains($0.id) } }

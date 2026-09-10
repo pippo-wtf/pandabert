@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-PandaBert 0.4.1 is a local preview. These limits describe the implementation, not a promise of future delivery.
+PandaBert 0.4.2 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Collection behavior
 
@@ -21,10 +21,14 @@ PandaBert 0.4.1 is a local preview. These limits describe the implementation, no
 
 ## Validation status
 
-The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 51 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
+The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 55 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
 
 [Back to the overview](../README.md)
 
 ## Guided setup
 
 The app opens a three-step wizard when no preferences file exists. It discovers conventional local profile folders, supports custom directory selection and profile names, and collects optional existing SSH/collector connections and GitHub-check preferences. Observation starts after a successful save. Existing installations can rerun it from Connections without losing pins or review history. It does not verify account identity, install remote collectors, enroll SSH hosts or perform GitHub login. Folder availability and actual connection health are distinct.
+
+## Acknowledging finished responses
+
+**Mark as seen** clears that finished response in PandaBert. A successful operating-system handoff from **Open thread** also marks the clicked completion as seen. Failed opens, questions and responses that changed while navigation was pending remain unacknowledged. This does not confirm destination-account access or approve anything in GitHub. A fresh response can surface again; pins and independent GitHub attention conditions remain intact.
