@@ -8,7 +8,7 @@ PandaBert is a small native macOS panel for people working across Claude Code an
 
 **Current version: 0.4.2 · Public preview · Apple Silicon · macOS 13+**
 
-**DISCLAIMER: I'm not a coder, i'm a creative, i work with ai, try to make reviews and keep code clean, but dont expect perfection from the code. Cheers.**
+**DISCLAIMER: I'm not a coder, i'm a creative, everything is done with ai, enjoy.**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="PandaBert attention panel with a pinned working task and a task that needs an answer" width="364">
