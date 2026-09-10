@@ -132,3 +132,13 @@ Validation:
 - All 42 tests passed after the resource integration. Release compilation, icon conversion and local signature verification passed. macOS icon conversion required running outside the restricted sandbox; the same valid icon set converted successfully there.
 - The native sample panel was inspected at its existing 364-point width: the new mark fits alongside the full Panda name and subline. Screenshot tasks are fictional. Observation, navigation, pin and glow logic are unchanged in this release.
 - Standalone resource check: temporarily removed the SwiftPM build-resource fallback, launched the packaged app and visually confirmed the logo rendered from its bundled resources. Restored the build resource afterward.
+
+
+## PandaBert and flexible height — 0.3.0
+
+- Renamed the app bundle, process/display name, header, menu actions, settings copy, diagnostics filename and current repository documentation to PandaBert. Kept “Keeps you on track” and the approved panda logo. Refreshed all four documentation screenshots with fictional tasks.
+- Removed the fixed 1,000-point window-height cap. The 364–460-point width range and 420-point minimum height remain; macOS still applies its normal screen constraints. Existing window-frame autosave remains enabled.
+- Preserved the app bundle identifier, data folder, collector command, environment overrides and internal Swift module/resource names. Existing settings, pins and machine identity carry over. The local legacy Panda.app shortcut now resolves to PandaBert.app; the older app bundle was retained in ignored build output.
+- All 42 tests passed. Release packaging and local signature verification passed. The real PandaBert app launched, and native sample inspection confirmed the full name and subline fit the existing compact header.
+- The UI automation adapter returned AXError.notImplemented for a window-edge drag. The height-cap removal is verified in the built source; an interactive drag beyond the old limit was not verified in this environment.
+- GitHub repository renamed to pippo-wtf/pandabert and confirmed public. Source repository visibility and user data scope did not change.

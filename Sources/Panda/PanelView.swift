@@ -22,7 +22,7 @@ struct PanelView: View {
             HStack(spacing: 7) {
                 PandaMark()
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("Panda").font(.system(size: 14, weight: .semibold))
+                    Text("PandaBert").font(.system(size: 14, weight: .semibold))
                     Text("Keeps you on track").font(.system(size: 8)).foregroundStyle(.white.opacity(0.72))
                 }.fixedSize(horizontal: true, vertical: false)
                 Spacer(minLength: 2)
@@ -59,7 +59,7 @@ struct PanelView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Image(systemName: "sparkle").foregroundStyle(lavender).font(.system(size: 22))
                             Text(store.sessions.isEmpty ? "Your activity will appear here." : "Nothing needs your attention here.").font(.system(size: 13, weight: .medium))
-                            Text(store.sessions.isEmpty ? "Add your profile folders in Connections. Panda observes Claude Code and Codex logs on this Mac." : "Keep this panel nearby. Pin any task you want to keep in sight.").font(.system(size: 11)).foregroundStyle(.secondary)
+                            Text(store.sessions.isEmpty ? "Add your profile folders in Connections. PandaBert observes Claude Code and Codex logs on this Mac." : "Keep this panel nearby. Pin any task you want to keep in sight.").font(.system(size: 11)).foregroundStyle(.secondary)
                         }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
                     }
                     Button { expanded.toggle() } label: {
@@ -174,7 +174,7 @@ struct DetailView: View {
                     Button("Reveal transcript") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: s.sourcePath)]) }
                 }
             }
-            Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; Panda does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
+            Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; PandaBert does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
         }.padding(22).frame(width: 390).onAppear { waiting = store.preferences.waits[s.id] ?? ""; alias = store.preferences.projectName(s) }
     }
 }
@@ -200,12 +200,12 @@ struct SettingsView: View {
                         }
                     }
                     Toggle("Keep the panel above other windows", isOn: $store.preferences.alwaysOnTop).onChange(of: store.preferences.alwaysOnTop) { _ in store.save() }
-                    Toggle("Open Panda when I log in", isOn: Binding(get: { startsAtLogin }, set: { enabled in
+                    Toggle("Open PandaBert when I log in", isOn: Binding(get: { startsAtLogin }, set: { enabled in
                         do {
                             if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
                             startsAtLogin = SMAppService.mainApp.status == .enabled
-                            settingsMessage = SMAppService.mainApp.status == .requiresApproval ? "Allow Panda in System Settings → Login Items." : ""
-                        } catch { settingsMessage = "Login setup unavailable. Move Panda to Applications and try again." }
+                            settingsMessage = SMAppService.mainApp.status == .requiresApproval ? "Allow PandaBert in System Settings → Login Items." : ""
+                        } catch { settingsMessage = "Login setup unavailable. Move PandaBert to Applications and try again." }
                     }))
                     Toggle("Show finished turns for review", isOn: $store.preferences.showFinished).onChange(of: store.preferences.showFinished) { _ in store.save() }
                     Toggle("Check linked pull requests using GitHub CLI", isOn: $store.preferences.githubEnabled).onChange(of: store.preferences.githubEnabled) { _ in store.save(); store.refresh(force: true) }
@@ -226,7 +226,7 @@ struct SettingsView: View {
                         if !store.preferences.profiles.contains(where: { $0.id == p.id }) { store.preferences.profiles.append(p) }
                         store.save(); profileLabel = ""; profileRoot = ""; store.refresh(force: true)
                     }.disabled(profileLabel.isEmpty || !(profileRoot.hasPrefix("/") || profileRoot.hasPrefix("~/")))
-                    Text("Choose the folder containing sessions (Codex) or projects (Claude). Profiles are labelled by you; Panda never guesses which account owns a folder.").font(.caption).foregroundStyle(.secondary)
+                    Text("Choose the folder containing sessions (Codex) or projects (Claude). Profiles are labelled by you; PandaBert never guesses which account owns a folder.").font(.caption).foregroundStyle(.secondary)
                     Divider()
                     Text("Other machines").font(.headline)
                     ForEach(store.preferences.remotes) { remote in
@@ -241,7 +241,7 @@ struct SettingsView: View {
                     Divider()
                     Text("Observed coverage").font(.headline)
                     Button("Export diagnostics (no task text)") {
-                        let panel = NSSavePanel(); panel.nameFieldStringValue = "panda-diagnostics.json"
+                        let panel = NSSavePanel(); panel.nameFieldStringValue = "pandabert-diagnostics.json"
                         guard panel.runModal() == .OK, let url = panel.url else { return }
                         let counts = Dictionary(grouping: store.sessions, by: { $0.displayActivity().rawValue }).mapValues(\.count)
                         let report: [String: Any] = ["version": pandaVersion, "generatedAt": ISO8601DateFormatter().string(from: Date()), "sessionCount": store.sessions.count, "projectCount": Set(store.sessions.map(\.projectKey)).count, "stateCounts": counts, "profileCount": store.preferences.profiles.count, "remoteCount": store.preferences.remotes.count, "availableSources": store.coverage.filter(\.available).count, "issueCount": store.issues.count]

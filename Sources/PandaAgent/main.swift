@@ -11,7 +11,7 @@ do {
         watch      Emit a JSON snapshot every five seconds until interrupted.
         Reads saved profile roots; defaults to ~/.claude and ~/.codex only when preferences are absent.
         Unreadable or invalid preferences stop collection with an error and no snapshot.
-        PANDA_HOME overrides Panda's own state folder (PULSE_HOME remains supported). No provider settings are changed.
+        PANDA_HOME overrides PandaBert's own state folder (PULSE_HOME remains supported). No provider settings are changed.
         """)
     } else if args == ["--version"] { print(pandaVersion) }
     else if args == ["snapshot"] || args == ["watch"] {

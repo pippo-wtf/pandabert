@@ -10,7 +10,7 @@ enum PandaBrand {
         let resources = packaged.flatMap { Bundle(url: $0) } ?? Bundle.module
         let image = NSImage(contentsOf: resources.url(forResource: "PandaMark", withExtension: "png")!)!
         image.isTemplate = true
-        image.accessibilityDescription = "Panda"
+        image.accessibilityDescription = "PandaBert"
         return image
     }()
     static var menuBarImage: NSImage {

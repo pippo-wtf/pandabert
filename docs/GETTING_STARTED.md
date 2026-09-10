@@ -1,4 +1,4 @@
-# Getting started with Panda
+# Getting started with PandaBert
 
 ## Build and run
 
@@ -6,26 +6,26 @@ Requires Apple Silicon macOS 13 or later. Build on this machine with the full Xc
 
 ```sh
 bash scripts/package.sh
-open dist/Panda.app
+open dist/PandaBert.app
 ```
 
-The app is locally ad-hoc signed, not notarized for public distribution. Quit it from the Panda menu-bar menu. Drag the panel background to move it; resize from an edge. Settings are behind the bottom-right sliders icon.
+The app is locally ad-hoc signed, not notarized for public distribution. Quit it from the PandaBert menu-bar menu. Drag the panel background to move it; resize from an edge. Settings are behind the bottom-right sliders icon.
 
-All Panda preferences and its small pinned-task cache live in `~/Library/Application Support/Pulse`. `PANDA_HOME` overrides this for isolated tests; the legacy `PULSE_HOME` variable also works. The existing `Pulse` data folder and app bundle identifier are retained for upgrade compatibility. Provider folders are only read; no Claude/Codex credentials, hooks or settings are modified. The app does not start, stop or approve any agent.
+All PandaBert preferences and its small pinned-task cache live in `~/Library/Application Support/Pulse`. `PANDA_HOME` overrides this for isolated tests; the legacy `PULSE_HOME` variable also works. The existing `Pulse` data folder and app bundle identifier are retained for upgrade compatibility. Provider folders are only read; no Claude/Codex credentials, hooks or settings are modified. The app does not start, stop or approve any agent.
 
 ## Connect another Mac
 
-Use an already established SSH alias with key authentication and a verified known-host entry. Panda does not enroll hosts, change SSH configuration, accept new host keys or ask for passwords. On the other Mac, build this package or transfer the matching Apple Silicon collector, then install the binary at `~/.local/bin/panda-agent`. For example, on that Mac from a built package:
+Use an already established SSH alias with key authentication and a verified known-host entry. PandaBert does not enroll hosts, change SSH configuration, accept new host keys or ask for passwords. On the other Mac, build this package or transfer the matching Apple Silicon collector, then install the binary at `~/.local/bin/panda-agent`. For example, on that Mac from a built package:
 
 ```sh
 mkdir -p ~/.local/bin
-cp dist/Panda.app/Contents/Resources/panda-agent ~/.local/bin/panda-agent
+cp dist/PandaBert.app/Contents/Resources/panda-agent ~/.local/bin/panda-agent
 ~/.local/bin/panda-agent snapshot
 ```
 
-Panda prefers `panda-agent` on remote Macs and falls back to an existing `pulse-agent` installation. The snapshot protocol remains compatible.
+PandaBert prefers `panda-agent` on remote Macs and falls back to an existing `pulse-agent` installation. The snapshot protocol remains compatible.
 
-In Panda Connections, enter a label and the existing SSH alias. Each machine keeps its Claude/Codex logins; Panda receives normalized task metadata and recent excerpts over encrypted SSH. A machine with two separately stored profiles can expose both by configuring its Panda preferences locally. Account switching inside the same provider home is not account attribution: give separate roots distinct labels.
+In PandaBert Connections, enter a label and the existing SSH alias. Each machine keeps its Claude/Codex logins; PandaBert receives normalized task metadata and recent excerpts over encrypted SSH. A machine with two separately stored profiles can expose both by configuring its PandaBert preferences locally. Account switching inside the same provider home is not account attribution: give separate roots distinct labels.
 
 Remote reading uses fixed arguments, BatchMode, StrictHostKeyChecking and a bounded response. The snapshot carries a protocol version, timestamp and stable machine/session identity; stale or mismatched responses are rejected. Failed remote refreshes retain last-known tasks with an unavailable state. This is implemented but still requires a real second-machine acceptance run.
 

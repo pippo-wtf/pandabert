@@ -1,10 +1,10 @@
-# Contributing to Panda
+# Contributing to PandaBert
 
-Panda is a public preview. Small, focused changes are easiest to review.
+PandaBert is a public preview. Small, focused changes are easiest to review.
 
 ## Report a problem
 
-Use the bug-report template and include the Panda version, macOS version, provider app version, desktop or terminal mode, and whether the task is local or remote. Describe what you expected and what Panda actually showed. Include reproduction steps if possible.
+Use the bug-report template and include the PandaBert version, macOS version, provider app version, desktop or terminal mode, and whether the task is local or remote. Describe what you expected and what PandaBert actually showed. Include reproduction steps if possible.
 
 A diagnostic export is available in **Connections → Export diagnostics**. It contains aggregate counts, not task text. Review attachments before sharing: screenshots and raw transcripts can contain private project names, prompts or account information. Do not attach credentials or full provider logs.
 
@@ -35,4 +35,4 @@ A diagnostic export is available in **Connections → Export diagnostics**. It c
 - Use isolated `PANDA_HOME` folders and sample data for tests. Do not change an operator's running agents or personal preferences.
 - Keep private activity snapshots, build output and real task data out of commits.
 
-[Back to Panda](README.md)
+[Back to PandaBert](README.md)

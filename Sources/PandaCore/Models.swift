@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-public let pandaVersion = "0.2.4"
+public let pandaVersion = "0.3.0"
 public let pandaProtocolVersion = 1
 
 public enum Provider: String, Codable, CaseIterable { case claude, codex
@@ -214,9 +214,9 @@ public enum PreferencesFile {
             let absent = lstat(path.path, &info) == -1 && errno == ENOENT
             let failure = error as NSError
             if absent && failure.domain == NSCocoaErrorDomain && failure.code == NSFileReadNoSuchFileError { return nil }
-            throw PandaError.message("Saved preferences could not be read. Observation is stopped; repair the file and restart Panda.")
+            throw PandaError.message("Saved preferences could not be read. Observation is stopped; repair the file and restart PandaBert.")
         }
         do { return try JSONDecoder().decode(Preferences.self, from: data) }
-        catch { throw PandaError.message("Saved preferences are invalid. Observation is stopped; repair the file and restart Panda.") }
+        catch { throw PandaError.message("Saved preferences are invalid. Observation is stopped; repair the file and restart PandaBert.") }
     }
 }
