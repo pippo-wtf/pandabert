@@ -2,7 +2,6 @@ import Foundation
 
 public final class Collector {
     private var cache: [String: (Date, UInt64, Session)] = [:]
-    private var repos: [String: String] = [:]
     public let machineID: String
     public let machine: String
     public init(root: URL = PandaPaths.data) throws {
@@ -50,19 +49,8 @@ public final class Collector {
                     if transcript.hasGap { reducer.transcriptGap() }
                     for record in transcript.tail { reducer.apply(record) }
                     var s = reducer.session; s.sourcePath = url.path
-                    if s.repository.isEmpty, !s.cwd.isEmpty {
-                        if let cached = repos[s.cwd] { s.repository = cached }
-                        else {
-                            let result = try? Command.run("/usr/bin/git", ["-C", s.cwd, "config", "--get", "remote.origin.url"], timeout: 2)
-                            let repo = result.map { String(decoding: $0, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines) } ?? ""
-                            repos[s.cwd] = repo; s.repository = repo
-                        }
-                    }
-                    s.projectKey = Self.projectKey(repository: s.repository, cwd: s.cwd, machine: machineID)
-                    // Do not retain credentials that may be embedded in an origin URL.
-                    if !s.repository.isEmpty { s.repository = s.projectKey }
-                    let repoName = s.projectKey.split(separator: "/").last.map(String.init) ?? ""
-                    s.project = !s.repository.isEmpty ? repoName : (s.cwd.isEmpty ? "Unassigned" : URL(fileURLWithPath: s.cwd).lastPathComponent)
+                    // Repository metadata comes only from transcripts, never from opening the project folder.
+                    if !s.repository.isEmpty { s.repository = Self.projectKey(repository: s.repository, cwd: s.cwd, machine: machineID) }
                     cache[key] = (modified, size, s); session = s
                 } else { errors = true }
                 if var s = session, !s.sidechain, !seen.contains(s.id) {
@@ -74,9 +62,33 @@ public final class Collector {
             coverage.append(Coverage(profile: profile.label, provider: profile.provider, available: exists, fileCount: count,
                 message: !exists ? "Session folder unavailable" : "Last 14 days · up to 250 sessions" + (errors || files.count > 250 ? " · partial coverage" : " · passive logs")))
         }
+        sessions = Self.groupProjects(sessions)
         sessions.sort { $0.lastEvent > $1.lastEvent }
         return Snapshot(machineID: machineID, machine: machine, generatedAt: now, sessions: sessions, coverage: coverage)
     }
+    /// Share explicit repository metadata between logs for the same local folder.
+    /// Missing or conflicting metadata falls back to the recorded path without touching it.
+    static func groupProjects(_ sessions: [Session]) -> [Session] {
+        var repositories: [String: Set<String>] = [:]
+        func location(_ s: Session) -> String {
+            s.machineID + ":" + URL(fileURLWithPath: s.cwd).standardizedFileURL.path
+        }
+        for s in sessions where !s.cwd.isEmpty && !s.repository.isEmpty {
+            repositories[location(s), default: []].insert(projectKey(repository: s.repository, cwd: s.cwd, machine: s.machineID))
+        }
+        return sessions.map { original in
+            var s = original
+            if s.repository.isEmpty, !s.cwd.isEmpty, let known = repositories[location(s)], known.count == 1 {
+                s.repository = known.first!
+            }
+            s.projectKey = projectKey(repository: s.repository, cwd: s.cwd, machine: s.machineID)
+            if !s.repository.isEmpty { s.repository = s.projectKey }
+            let repoName = s.projectKey.split(separator: "/").last.map(String.init) ?? ""
+            s.project = !s.repository.isEmpty ? repoName : (s.cwd.isEmpty ? "Unassigned" : URL(fileURLWithPath: s.cwd).lastPathComponent)
+            return s
+        }
+    }
+
     // Parse complete JSONL records only. Large transcripts retain metadata plus a bounded recent tail.
     public static func readRecords(_ url: URL, limit: Int = 2 * 1024 * 1024) throws -> [[String: Any]] {
         let transcript = try readTranscript(url, limit: limit)

@@ -23,17 +23,23 @@ cat > "$panda_app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleExecutable</key><string>PandaBert</string>
 <key>CFBundleIconFile</key><string>Panda</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.4.4</string>
-<key>CFBundleVersion</key><string>20</string>
+<key>CFBundleShortVersionString</key><string>0.4.5</string>
+<key>CFBundleVersion</key><string>21</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
 ln -sfn panda-agent "$panda_app/Contents/Resources/pulse-agent"
-codesign --force --sign - "$panda_app/Contents/Resources/panda-agent"
-codesign --force --sign - "$panda_app"
+# A persistent Developer ID identity keeps the app's privacy identity stable across updates.
+panda_signing_identity="${PANDA_SIGNING_IDENTITY:--}"
+panda_sign_args=(--force --sign "$panda_signing_identity")
+if [ "$panda_signing_identity" != "-" ]; then
+    panda_sign_args+=(--options runtime --timestamp)
+fi
+codesign "${panda_sign_args[@]}" "$panda_app/Contents/Resources/panda-agent"
+codesign "${panda_sign_args[@]}" "$panda_app"
 codesign --verify --strict "$panda_app"
-ditto -c -k --keepParent "$panda_app" "$PWD/dist/PandaBert-0.4.4-macos-arm64.zip"
+ditto -c -k --keepParent "$panda_app" "$PWD/dist/PandaBert-0.4.5-macos-arm64.zip"
 if [ ! -e "$PWD/dist/Panda.app" ]; then ln -sfn PandaBert.app "$PWD/dist/Panda.app"; fi
 echo "Packaged: $panda_app"
