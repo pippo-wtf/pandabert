@@ -14,7 +14,7 @@ These were checked in the installed apps' Info.plist and packaged navigation/ses
 
 ## Identity and limits
 
-Codex uses the recorded native UUID. Claude requires an explicit local mapping read from its session metadata, using the CLI session ID rather than guessing that it equals the desktop ID. The mapping is loaded again on click so a cached or pinned task cannot open a removed mapping. Ambiguous mappings are discarded. Bridge IDs alone never enable navigation: a syntactically valid bridge ID does not prove that its conversation exists in the desktop app. Remote Claude navigation is disabled as well.
+Codex uses the recorded native UUID. Claude requires an explicit local mapping read from its session metadata, using the CLI session ID rather than guessing that it equals the desktop ID. Panda checks the standard Claude session folder and up to 64 Parall profile folders, including independently stored second-account metadata. It recognizes recorded current, pre-clear, unarchived and prior CLI IDs. UUID-named Claude transcripts use their filename identity, so copied parent history cannot merge a fork with its parent or supply its bridge link. The mapping is loaded again on click so a cached or pinned task cannot open a removed mapping. Ambiguous mappings are discarded. Bridge IDs alone never enable navigation: a syntactically valid bridge ID does not prove that its conversation exists in the desktop app. Remote Claude navigation is disabled as well.
 
 Only validated identifiers enter the fixed URL templates. No prompt, command, filesystem path or arbitrary query string is forwarded. The matching app bundle is selected explicitly; missing-app errors are surfaced. Sessions lacking a desktop connection have a disabled button and an explanation in Details.
 
@@ -24,6 +24,6 @@ Optional identity fields preserve decoding of existing Panda snapshots and pinne
 
 ## Validation
 
-The full suite passes: **31 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time and ambiguous metadata.
+The full suite passes: **35 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
 
 The release app and embedded collector were rebuilt and locally signature-verified. Live navigation results are recorded in `VALIDATION.md`.

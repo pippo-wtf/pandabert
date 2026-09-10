@@ -96,3 +96,13 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Added “Keeps you on track” directly beneath Panda in the compact header and as the README subline. Tightened header spacing and kept the attention count on one line.
 - Release build and local signature verification passed. Native sample-data inspection confirmed the full subline, project selector and one-line count fit at the default 364-point panel width. Refreshed the header-bearing README screenshots.
 - Presentation-only change. The 31-test suite was last run for 0.2.0; it was not rerun for this text/layout adjustment.
+
+
+## Claude second-account links and fork identity — 0.2.2
+
+- Root cause: a Parall-launched Claude instance stored desktop conversation metadata outside the standard Claude folder. Activity logs were visible to Panda, but their desktop ID mappings were not. The index now discovers standard Claude metadata plus up to 64 Parall profile folders, with a shared 3,000-record bound and existing identity validation. Prior CLI ID arrays are recognized. Cross-profile ambiguous mappings remain unavailable.
+- Claude UUID-named transcripts now use the filename as their native identity. Records explicitly belonging to another session are ignored, preventing copied fork history from supplying the parent's title, bridge, activity or deduplication key.
+- All **35 tests passed**, including new Parall discovery, deleted-map revalidation, cross-profile ambiguity, prior-ID and separate parent/fork regression tests. Release packaging and local signature verification passed.
+- Live collector verification resolved the previously disabled conversation to its exact desktop ID. It also returned separate parent and fork records with the correct IDs, with no inherited parent bridge on the fork.
+- Live native acceptance: selected a different existing Claude conversation, clicked the previously disabled task's Open thread button in Panda, then verified Claude changed to the target's exact desktop route and displayed its matching title. No prompt was submitted or task marked reviewed. The standard Claude bundle was running with the Parall profile on this machine.
+- Automatic switching between separately signed-in app instances, remote navigation and four-account multi-machine acceptance remain unverified. Metadata establishes identity, not authorization in a different active account. The earlier unrelated code-review findings remain open.

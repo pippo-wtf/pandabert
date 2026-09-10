@@ -37,10 +37,13 @@ public final class Collector {
                 var session: Session?
                 if let cached = cache[key], cached.0 == modified, cached.1 == size { session = cached.2 }
                 else if let records = try? Self.readRecords(url) {
-                    let native = records.lazy.compactMap { o -> String? in
+                    let fileID = url.deletingPathExtension().lastPathComponent
+                    let recordedID = records.lazy.compactMap { o -> String? in
                         if profile.provider == .codex, o["type"] as? String == "session_meta" { return (o["payload"] as? [String: Any])?["id"] as? String }
                         return o["sessionId"] as? String
-                    }.first ?? url.deletingPathExtension().lastPathComponent
+                    }.first ?? fileID
+                    // Forks copy parent history; the UUID filename identifies the current Claude session.
+                    let native = profile.provider == .claude && UUID(uuidString: fileID) != nil ? fileID : recordedID
                     var reducer = SessionReducer(Session(nativeID: native, profile: profile, machineID: machineID, machine: machine))
                     for record in records { reducer.apply(record) }
                     var s = reducer.session; s.sourcePath = url.path

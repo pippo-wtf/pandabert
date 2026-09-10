@@ -98,6 +98,8 @@ public struct SessionReducer {
         // A failed tool is not a failed run; shell text mentioning escalation is not a permission event.
     }
     private mutating func claude(_ o: [String: Any]) {
+        // Inherited fork history must not supply the parent's title, bridge, or activity.
+        if let id = o["sessionId"] as? String, id.caseInsensitiveCompare(session.nativeID) != .orderedSame { return }
         metadata(o)
         if o["isSidechain"] as? Bool == true { session.sidechain = true }
         if let id = o["bridgeSessionId"] as? String, !id.isEmpty { session.entrypoint = "Desktop Code"; session.bridgeSessionID = id }

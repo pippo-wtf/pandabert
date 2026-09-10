@@ -21,7 +21,7 @@ public struct ThreadLink {
         }
     }
     /// Refresh identity evidence at click time, including for cached or pinned tasks.
-    public static func revalidated(session: Session, localMachineID: String, desktopRoot: URL = ClaudeDesktopIndex.defaultRoot) -> ThreadLink {
+    public static func revalidated(session: Session, localMachineID: String, desktopRoot: URL? = nil) -> ThreadLink {
         var current = session
         if current.provider == .claude {
             current.desktopSessionID = current.machineID == localMachineID ? ClaudeDesktopIndex.load(root: desktopRoot)[current.nativeID] : nil
@@ -33,21 +33,38 @@ public struct ThreadLink {
 public enum ClaudeDesktopIndex {
     public static var defaultRoot: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Claude/claude-code-sessions") }
     // Read only session identity fields. Never import, resume, or rewrite provider sessions.
-    public static func load(root: URL = defaultRoot) -> [String: String] {
+    public static func roots(applicationSupport: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")) -> [URL] {
+        var roots = [applicationSupport.appendingPathComponent("Claude/claude-code-sessions")]
+        // Parall launches Claude with a separate user-data directory for each account.
+        let parall = applicationSupport.appendingPathComponent("Parall")
+        let profiles = (try? FileManager.default.contentsOfDirectory(at: parall, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])) ?? []
+        for profile in profiles.sorted(by: { $0.path < $1.path }).prefix(64) {
+            let sessions = profile.appendingPathComponent("claude-code-sessions")
+            if (try? sessions.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true { roots.append(sessions) }
+        }
+        return roots
+    }
+    public static func load(root: URL? = nil) -> [String: String] {
+        load(roots: root.map { [$0] } ?? roots())
+    }
+    public static func load(roots: [URL]) -> [String: String] {
         var result: [String: String] = [:]; var ambiguous = Set<String>(); var count = 0
-        guard let e = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]) else { return result }
-        for case let file as URL in e {
-            if e.level > 3 { e.skipDescendants(); continue }
-            guard file.pathExtension == "json", file.lastPathComponent.hasPrefix("local_") else { continue }
-            count += 1; if count > 3000 { break }
-            guard let size = try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize, size <= 2 * 1024 * 1024,
-                  let data = try? Data(contentsOf: file), let record = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-                  let desktop = record["sessionId"] as? String, desktop == file.deletingPathExtension().lastPathComponent,
-                  UUID(uuidString: String(desktop.dropFirst(6))) != nil else { continue }
-            for field in ["cliSessionId", "unarchivedCliSessionId", "preClearCliSessionId"] {
-                guard let cli = record[field] as? String, UUID(uuidString: cli) != nil else { continue }
-                if let prior = result[cli], prior != desktop { ambiguous.insert(cli) }
-                result[cli] = desktop
+        for root in roots {
+            guard let e = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]) else { continue }
+            for case let file as URL in e {
+                if e.level > 3 { e.skipDescendants(); continue }
+                guard file.pathExtension == "json", file.lastPathComponent.hasPrefix("local_") else { continue }
+                count += 1; if count > 3000 { break }
+                guard let size = try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize, size <= 2 * 1024 * 1024,
+                      let data = try? Data(contentsOf: file), let record = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+                      let desktop = record["sessionId"] as? String, desktop == file.deletingPathExtension().lastPathComponent,
+                      UUID(uuidString: String(desktop.dropFirst(6))) != nil else { continue }
+                let ids = ["cliSessionId", "unarchivedCliSessionId", "preClearCliSessionId"].compactMap { record[$0] as? String } + (record["priorCliSessionIds"] as? [String] ?? [])
+                for cli in ids {
+                    guard UUID(uuidString: cli) != nil else { continue }
+                    if let prior = result[cli], prior != desktop { ambiguous.insert(cli) }
+                    result[cli] = desktop
+                }
             }
         }
         for key in ambiguous { result[key] = nil }
