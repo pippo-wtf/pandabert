@@ -185,3 +185,10 @@ Validation:
 - All **55 tests passed**, including four new app-level navigation tests covering persisted acknowledgement, failure/invalid links, delayed callbacks, preserved pins and newer/question responses. Test output: `.build/test-results-0.4.2.txt`. Release build, packaging and local signature verification passed (`.build/package-results-0.4.2.txt`).
 - Live native inspection confirmed the new button fits the compact card next to Open thread and Details. Opened one existing finished Claude conversation from PandaBert, then verified the matching conversation title and desktop route in Claude. PandaBert's Needs you count changed from eight to seven, its background count increased by one, and one new seen marker was persisted while all previous markers were preserved. No prompt was sent and no GitHub action occurred.
 - macOS handoff success cannot prove that a person read the response or that the destination account always has access. This limitation is documented in NAVIGATION.md. The live check did verify access to the selected Claude conversation; broader account/machine acceptance remains separate.
+
+
+## Outline-only seen button — 0.4.2 follow-up
+
+- Removed the white fill from Mark as seen, retaining the subtle outline, checkmark and label. An explicit capsule hit area keeps the empty interior clickable. The shared control updates both cards and Details; acknowledgement logic is unchanged.
+- Release build, packaging and local signature verification passed (`.build/package-seen-outline.txt`). No new tests were added for this style-only change.
+- Native visual inspection confirmed the button interior matches its card background and only the outline, checkmark and label remain.

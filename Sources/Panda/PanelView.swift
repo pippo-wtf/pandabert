@@ -139,7 +139,7 @@ struct MarkSeenButton: View {
                 .font(.system(size: 10, weight: .medium))
                 .padding(.horizontal, 10).padding(.vertical, 8)
                 .foregroundStyle(ink)
-                .background(Color.white, in: Capsule())
+                .contentShape(Capsule())
                 .overlay(Capsule().stroke(ink.opacity(0.18), lineWidth: 1))
                 .fixedSize(horizontal: true, vertical: false)
         }.buttonStyle(.plain)
