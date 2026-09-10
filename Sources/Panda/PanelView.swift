@@ -70,6 +70,7 @@ struct PanelView: View {
                             Text(store.sessions.isEmpty ? "Your activity will appear here." : "Nothing needs your attention here.").font(.system(size: 13, weight: .medium))
                             Text(store.sessions.isEmpty ? "Add your profile folders in Connections. PandaBert observes Claude Code and Codex logs on this Mac." : "Keep this panel nearby. Pin any task you want to keep in sight.").font(.system(size: 11)).foregroundStyle(.secondary)
                         }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
+                            .transition(SeenDismissal.emptyStateTransition(reduceMotion: reduceMotion))
                     }
                     Button { expanded.toggle() } label: {
                         HStack { Circle().fill(working > 0 ? lavender : StatusTone.quiet.accent).frame(width: 6, height: 6); Text("In the background").fontWeight(.medium); Spacer(); Text("\(store.background.count)").foregroundStyle(.secondary); Image(systemName: expanded ? "chevron.up" : "chevron.down") }.font(.system(size: 11)).padding(.vertical, 13)

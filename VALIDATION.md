@@ -206,3 +206,9 @@ Validation:
 
 - Reversed the rubber-band direction: a 90 ms pull right, then a 210 ms stretch and snap left. Total configured exit duration is now 0.3 seconds; the remaining-card spring response is also shortened to 0.3 seconds. Reduced Motion and acknowledgement behavior are unchanged.
 - Release build, packaging and local signature verification passed (`.build/package-dismissal-snap-left.txt`). The rebuilt native app launched successfully. Direction and timing were checked in the compiled source; this follow-up did not measure animation frames or acknowledge a real task. The existing 55-test result above predates this timing-only follow-up.
+
+## Empty-state reveal — 0.4.3 follow-up
+
+- The empty-state card now uses a synchronized insertion transition. Its entire content stays transparent until the departing card is 80% outside its original position, including the stretched trailing edge, then fades fully in by the end of the same 0.3-second animation. Shared geometry avoids an independent timer or delayed state mutation. Reduced Motion retains a stationary fade; an initially empty panel can show its message immediately.
+- All 55 regression tests passed (`.build/test-empty-state-reveal.txt`). A temporary Swift check using the actual production motion helper sampled 1,001 progress positions and verified zero opacity through the 80% boundary and full opacity at the end. This checks the motion calculation, not rendered frames.
+- Release build, packaging and local signature verification passed (`.build/package-empty-state-reveal.txt`); the rebuilt native app launched successfully. No real task was acknowledged during this follow-up.
