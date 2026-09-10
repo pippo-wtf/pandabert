@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-PandaBert 0.3.1 is a local preview. These limits describe the implementation, not a promise of future delivery.
+PandaBert 0.4.0 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Collection behavior
 
@@ -21,6 +21,10 @@ PandaBert 0.3.1 is a local preview. These limits describe the implementation, no
 
 ## Validation status
 
-The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 45 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
+The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 51 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
 
 [Back to the overview](../README.md)
+
+## Guided setup
+
+The app opens a three-step wizard when no preferences file exists. It discovers conventional local profile folders, supports custom directory selection and profile names, and collects optional existing SSH/collector connections and GitHub-check preferences. Observation starts after a successful save. Existing installations can rerun it from Connections without losing pins or review history. It does not verify account identity, install remote collectors, enroll SSH hosts or perform GitHub login. Folder availability and actual connection health are distinct.

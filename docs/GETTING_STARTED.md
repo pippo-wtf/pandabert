@@ -13,6 +13,18 @@ The app is locally ad-hoc signed, not notarized for public distribution. Quit it
 
 All PandaBert preferences and its small pinned-task cache live in `~/Library/Application Support/Pulse`. `PANDA_HOME` overrides this for isolated tests; the legacy `PULSE_HOME` variable also works. The existing `Pulse` data folder and app bundle identifier are retained for upgrade compatibility. Provider folders are only read; no Claude/Codex credentials, hooks or settings are modified. The app does not start, stop or approve any agent.
 
+## Guided setup
+
+A fresh app installation opens a three-step wizard:
+
+1. **Find your activity:** select local Claude Code/Codex profile roots and give them recognizable names. PandaBert checks standard roots and up to 64 conventional `.claude-*` / `.codex-*` folders. Choose another folder for custom locations; select the root containing `projects` (Claude) or `sessions` (Codex), not an individual transcript. A green dot means the log directory is readable, not that an account or live session has been verified.
+2. **Your other Macs:** optionally add an already trusted SSH alias and installed collector. The prerequisites below still apply; the wizard does not install the remote collector, create credentials or verify the remote connection. Connection results appear after saving.
+3. **Review your setup:** review your selection and optionally enable linked GitHub PR checks using an existing `gh` login. Choose **Save and start** to persist the configuration and begin observation.
+
+Closing before saving leaves setup unfinished and starts no observation on a fresh installation. The wizard can be reopened with **Set up PandaBert**. On existing installations, use **Connections → Run setup wizard**; closing discards wizard changes, and saving preserves pins, per-turn review history and unrelated preferences. Settings that cannot be read are not overwritten by setup. The standalone collector CLI retains its existing default-folder behavior.
+
+Standard Claude and Parall desktop-link folders are automatically checked. Folder labels are chosen by you; PandaBert does not verify account ownership, switch the active provider account, or connect regular Claude Chat/Cowork.
+
 ## Connect another Mac
 
 Use an already established SSH alias with key authentication and a verified known-host entry. PandaBert does not enroll hosts, change SSH configuration, accept new host keys or ask for passwords. On the other Mac, build this package or transfer the matching Apple Silicon collector, then install the binary at `~/.local/bin/panda-agent`. For example, on that Mac from a built package:

@@ -39,15 +39,18 @@ struct PanelView: View {
             }.foregroundStyle(.white).padding(.horizontal, 13).frame(height: 43).background(ink, in: Capsule()).padding(16)
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(store.loading ? "Finding your activity…" : needsCount == 0 ? "Room to focus." : "\(needsCount == 1 ? "One thing needs" : "\(needsCount) things need") you.")
+                    Text(store.needsSetup ? "Welcome to PandaBert." : store.loading ? "Finding your activity…" : needsCount == 0 ? "Room to focus." : "\(needsCount == 1 ? "One thing needs" : "\(needsCount) things need") you.")
                         .font(.system(size: 25, weight: .semibold, design: .rounded)).tracking(-0.7)
-                    Text(store.loading ? "Reading local session activity." : "\(working) \(working == 1 ? "chat is" : "chats are") working across \(Set(store.sessions.map(\.projectKey)).count) projects.")
+                    Text(store.needsSetup ? "Choose the activity folders and machines to watch." : store.loading ? "Reading local session activity." : "\(working) \(working == 1 ? "chat is" : "chats are") working across \(Set(store.sessions.map(\.projectKey)).count) projects.")
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
             }.padding(.horizontal, 21).padding(.top, 5).padding(.bottom, 19)
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
+                    if store.needsSetup {
+                        Button("Set up PandaBert") { store.showSetup = true }.buttonStyle(.borderedProminent).tint(lavender)
+                    }
                     if !store.pinned.isEmpty {
                         sectionLabel("PINNED", count: store.pinned.count)
                         ForEach(store.pinned) { s in card(s, pinned: true) }
@@ -84,6 +87,7 @@ struct PanelView: View {
             .frame(minWidth: 364, idealWidth: 364, maxWidth: 460, minHeight: 420)
             .sheet(item: $selected) { s in DetailView(store: store, original: s) }
             .sheet(isPresented: $settings) { SettingsView(store: store) }
+            .sheet(isPresented: $store.showSetup) { SetupWizard(store: store) }
             .alert("Could not open thread", isPresented: Binding(get: { store.navigationError != nil }, set: { if !$0 { store.navigationError = nil } })) {
                 Button("OK") { store.navigationError = nil }
             } message: { Text(store.navigationError ?? "") }
@@ -198,6 +202,7 @@ struct SettingsView: View {
     @State private var remoteHost = ""
     @State private var startsAtLogin = SMAppService.mainApp.status == .enabled
     @State private var settingsMessage = ""
+    @State private var setup = false
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack { Text("Connections").font(.title2.weight(.semibold)); Spacer(); Button("Done") { store.save(); store.refresh(force: true); dismiss() } }
@@ -208,6 +213,7 @@ struct SettingsView: View {
                             HStack(spacing: 5) { Circle().fill(tone.accent).frame(width: 6, height: 6); Text(tone.label).font(.system(size: 10)).foregroundStyle(.secondary) }.padding(.trailing, 6)
                         }
                     }
+                    Button("Run setup wizard") { setup = true }
                     Toggle("Keep the panel above other windows", isOn: $store.preferences.alwaysOnTop).onChange(of: store.preferences.alwaysOnTop) { _ in store.save() }
                     Toggle("Open PandaBert when I log in", isOn: Binding(get: { startsAtLogin }, set: { enabled in
                         do {
@@ -265,5 +271,6 @@ struct SettingsView: View {
                 }
             }
         }.padding(22).frame(width: 430, height: 610)
+            .sheet(isPresented: $setup) { SetupWizard(store: store) }
     }
 }

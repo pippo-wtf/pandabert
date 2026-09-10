@@ -8,7 +8,7 @@ PandaBert is a small native macOS panel for people working across Claude Code an
 
 Previously called Panda and Pulse. Existing settings and pins carry over.
 
-**Current version: 0.3.1 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.4.0 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="PandaBert attention panel with a pinned working task and a task that needs an answer" width="364">
@@ -86,7 +86,9 @@ bash scripts/package.sh
 open dist/PandaBert.app
 ```
 
-PandaBert begins with the default local Claude Code and Codex profile folders. Use the sliders icon at the bottom right to add other profile folders or configure a trusted remote Mac.
+On first launch, a three-step setup wizard helps you select and name detected Claude Code/Codex log folders, add an existing remote collector, and choose optional GitHub checks. Nothing is observed until you choose **Save and start**. Close the wizard to leave setup unfinished; reopen it with **Set up PandaBert**.
+
+Existing installations keep their configuration. Open the bottom-right sliders icon → **Run setup wizard** to revisit setup. Folder detection is not account verification; normal Claude and Parall desktop-link folders are discovered automatically, while custom log folders can be selected with the folder picker.
 
 The app is locally ad-hoc signed; this preview has no notarized installer or automatic updater. Build time depends on your machine.
 
@@ -94,7 +96,7 @@ The app is locally ad-hoc signed; this preview has no notarized installer or aut
 
 ## Current scope
 
-Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **31 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
+Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **51 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
 
 Some important boundaries:
 
