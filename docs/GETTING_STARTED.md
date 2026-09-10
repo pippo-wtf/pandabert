@@ -9,6 +9,8 @@ bash scripts/package.sh
 open dist/PandaBert.app
 ```
 
+A brief panda nose-drip animation plays once at launch, then reveals the panel or first-run setup wizard. Its deadline is 2.7 seconds; it does not wait for activity collection. Showing the existing panel again does not replay it. With macOS Reduce Motion enabled, the logo stays still.
+
 The app is locally ad-hoc signed, not notarized for public distribution. Quit it from the PandaBert menu-bar menu. Drag the panel background to move it; resize from an edge. Settings are behind the bottom-right sliders icon.
 
 All PandaBert preferences and its small pinned-task cache live in `~/Library/Application Support/Pulse`. `PANDA_HOME` overrides this for isolated tests; the legacy `PULSE_HOME` variable also works. The existing `Pulse` data folder and app bundle identifier are retained for upgrade compatibility. Provider folders are only read; no Claude/Codex credentials, hooks or settings are modified. The app does not start, stop or approve any agent.

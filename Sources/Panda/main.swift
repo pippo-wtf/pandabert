@@ -18,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.minSize = NSSize(width: 364, height: 420); panel.maxSize = NSSize(width: 460, height: CGFloat.greatestFiniteMagnitude)
         panel.level = store.preferences.alwaysOnTop ? .floating : .normal
-        panel.contentView = NSHostingView(rootView: PanelView(store: store).preferredColorScheme(.light))
+        panel.contentView = NSHostingView(rootView: LaunchContainer(store: store).preferredColorScheme(.light))
         panel.delegate = self
         panel.setFrameAutosaveName("PulseAttentionPanel")
         if !panel.setFrameUsingName("PulseAttentionPanel"), let screen = NSScreen.main {

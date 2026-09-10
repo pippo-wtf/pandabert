@@ -6,7 +6,7 @@
 
 PandaBert is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.4.0 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.4.1 · Public preview · Apple Silicon · macOS 13+**
 
 **DISCLAIMER: I'm not a coder, i'm a creative, i work with ai, try to make reviews and keep code clean, but dont expect perfection from the code. Cheers.**
 
@@ -85,6 +85,8 @@ cd pandabert
 bash scripts/package.sh
 open dist/PandaBert.app
 ```
+
+Each app launch opens with a short panda animation: the nose drip falls, then gets sniffed back in before the panel appears. The intro uses a 2.7-second deadline, plays once per launch, and shows a still logo when macOS Reduce Motion is enabled.
 
 On first launch, a three-step setup wizard helps you select and name detected Claude Code/Codex log folders, add an existing remote collector, and choose optional GitHub checks. Nothing is observed until you choose **Save and start**. Close the wizard to leave setup unfinished; reopen it with **Set up PandaBert**.
 
