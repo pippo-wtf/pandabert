@@ -53,6 +53,14 @@ Labels accompany the dots. Cards stay neutral, and lavender controls use white t
   </tr>
 </table>
 
+### The newest notification
+
+<p align="center">
+  <img src="docs/screenshots/notification-glow.jpg" alt="Pulse showing a soft lavender halo around the newest task needing attention, with a faint outline and neutral card surface" width="364">
+</p>
+
+The newest attention item glows softly for 30 seconds, with an eight-second breathing cycle and a gentle fade. This still image captures the glow in Pulse 0.1.6; the pin above it keeps its usual subtle outline.
+
 All screenshots use sample data. [Screenshot notes](docs/screenshots/README.md).
 
 ## How it works
