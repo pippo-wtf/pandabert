@@ -218,3 +218,8 @@ Validation:
 - Mirrored the existing 0.3-second exit: short pull left, fast snap right. Remaining content waits 80 ms before its upward spring begins; the explicit exit and empty-state transition keep their original timeline. Reduced Motion remains a stationary fade without the added delay.
 - Updated the shared departure-distance calculation for the rightward exit, preserving the 80% threshold before the empty-state fade. A temporary Swift check against the production helper verified the pull/exit directions and sampled 1,001 positions to confirm the reveal threshold and final opacity.
 - All 55 tests passed (`.build/test-dismissal-mirrored.txt`). Release packaging and signature verification passed (`.build/package-dismissal-mirrored.txt`), and the updated native app launched. This follow-up checked the motion calculation and configured timing, not rendered animation frames; no real task was acknowledged.
+
+## Final exit direction — 0.4.3 follow-up
+
+- Restored the requested rightward pull followed by a leftward snap. Kept all timing unchanged: 90 ms pull, 210 ms exit, 80 ms delay before remaining cards settle. The empty-state reveal still follows the 80% departure threshold.
+- A temporary Swift check against the production helper verified both directions and the reveal threshold across 1,001 progress positions. Release packaging and signature verification passed (`.build/package-dismissal-final-left.txt`); the rebuilt native app launched. No real task was acknowledged or animation frames measured. The preceding 55-test result predates this direction-only correction.

@@ -49,12 +49,12 @@ private struct RubberBandMotion {
         let pull = smoothExit(t / 0.3)
         let release = min(1, max(0, (t - 0.3) / 0.7))
         let snap = 1 - pow(1 - release, 3)
-        // Pull left for 90 ms, then stretch and snap right out of the panel over 210 ms.
-        displacement = -0.045 * pull + 1.25 * snap
+        // Pull right for 90 ms, then stretch and snap left out of the panel over 210 ms.
+        displacement = 0.045 * pull - 1.25 * snap
         stretch = -0.06 * pull * (1 - smoothExit(release / 0.35)) + 0.10 * sin(.pi * release)
     }
     // Account for the stretched trailing edge, rather than using elapsed time as distance.
-    var fractionOutside: CGFloat { displacement - stretch / 2 }
+    var fractionOutside: CGFloat { -displacement - stretch / 2 }
 }
 
 private struct EmptyStateEntrance: AnimatableModifier {
