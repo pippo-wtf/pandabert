@@ -120,4 +120,62 @@ final class ThreadSeenTests: XCTestCase {
         XCTAssertEqual(decoded.keptCardIDs, ["existing"])
     }
 
+    private func observeFinishedTask(_ store: PandaStore) throws -> Session {
+        let root = store.root.appendingPathComponent("sample-profile")
+        let logs = root.appendingPathComponent("sessions")
+        try FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)
+        let id = UUID().uuidString
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let events: [[String: Any]] = [
+            ["type": "session_meta", "timestamp": timestamp, "payload": ["id": id, "cwd": "/Sample/Website", "originator": "desktop"]],
+            ["type": "event_msg", "timestamp": timestamp, "payload": ["type": "user_message", "message": "Sample task"]],
+            ["type": "event_msg", "timestamp": timestamp, "payload": ["type": "task_started", "turn_id": "sample-turn"]],
+            ["type": "event_msg", "timestamp": timestamp, "payload": ["type": "task_complete", "turn_id": "sample-turn", "last_agent_message": "Ready for review"]]
+        ]
+        let lines = try events.map { String(decoding: try JSONSerialization.data(withJSONObject: $0), as: UTF8.self) }.joined(separator: "\n") + "\n"
+        try lines.write(to: logs.appendingPathComponent(id + ".jsonl"), atomically: true, encoding: .utf8)
+        store.preferences.attentionSince = .distantPast
+        try store.completeSetup(profiles: [Profile(provider: .codex, label: "Sample", root: root.path)], remotes: [], githubEnabled: false)
+        let observed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            store.sessions.contains { $0.nativeID == id && $0.sourceOnline && $0.activity == .finished }
+        }, object: nil)
+        wait(for: [observed], timeout: 3)
+        return try XCTUnwrap(store.sessions.first { $0.nativeID == id })
+    }
+
+    private func waitForUnpinPause() {
+        let settled = expectation(description: "Unpin pause elapsed")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { settled.fulfill() }
+        wait(for: [settled], timeout: 2)
+    }
+
+    func testUnseenUnpinWaitsThenReturnsToAttentionWithoutAcknowledging() throws {
+        let store = try makeStore { _, _, _ in }
+        let s = try observeFinishedTask(store)
+        store.pin(s); store.pin(s)
+        XCTAssertTrue(store.preferences.keptCardIDs.contains(s.id))
+        XCTAssertTrue(store.attention.isEmpty)
+        waitForUnpinPause()
+        XCTAssertFalse(store.preferences.keptCardIDs.contains(s.id))
+        XCTAssertNil(store.preferences.reviewed[s.id])
+        XCTAssertFalse(try XCTUnwrap(PreferencesFile.load(root: store.root)).keptCardIDs.contains(s.id))
+        XCTAssertEqual(store.attention.map(\.id), [s.id])
+    }
+
+    func testRepinningOrSeeingDuringPausePreventsReturnToAttention() throws {
+        let store = try makeStore { _, _, _ in }
+        let s = try observeFinishedTask(store)
+        store.pin(s); store.pin(s)
+        store.pin(s)
+        waitForUnpinPause()
+        XCTAssertTrue(store.preferences.pins.contains(s.id))
+        XCTAssertTrue(store.preferences.keptCardIDs.contains(s.id))
+        store.pin(s)
+        // A newer acknowledgement must also be respected when the delayed move runs.
+        store.preferences.reviewed[s.id] = s.completionKey
+        waitForUnpinPause()
+        XCTAssertTrue(store.preferences.keptCardIDs.contains(s.id))
+        XCTAssertTrue(store.attention.isEmpty)
+    }
+
 }

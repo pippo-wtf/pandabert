@@ -21,6 +21,7 @@ final class PandaStore: ObservableObject {
     private let openConversation: ThreadOpenAction
     private var pipeline: ObservationPipeline?
     private var timer: Timer?
+    private var pendingUnpins: [String: DispatchWorkItem] = [:]
     private var pinnedCache: [Session] = []
     private var preferenceError: String?
     var onTopChanged: ((Bool) -> Void)?
@@ -76,11 +77,33 @@ final class PandaStore: ObservableObject {
         refresh()
     }
     func pin(_ session: Session) {
+        pendingUnpins.removeValue(forKey: session.id)?.cancel()
+        let wasPinned = preferences.pins.contains(session.id)
         preferences.togglePin(session.id)
         cardPresses[session.id, default: 0] += 1
         save()
+        guard wasPinned, preferences.needsAttention(session),
+              preferences.reviewed[session.id] != session.completionKey else { return }
+        let returnToAttention = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.pendingUnpins.removeValue(forKey: session.id)
+            guard !self.preferences.pins.contains(session.id),
+                  self.preferences.keptCardIDs.contains(session.id),
+                  let current = self.sessions.first(where: { $0.id == session.id }),
+                  self.preferences.needsAttention(current),
+                  self.preferences.reviewed[current.id] != current.completionKey else { return }
+            let motion: Animation? = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+                ? nil : .spring(response: 0.32, dampingFraction: 0.86)
+            withAnimation(motion) {
+                self.preferences.releaseUnpinnedCard(session.id)
+                self.save()
+            }
+        }
+        pendingUnpins[session.id] = returnToAttention
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: returnToAttention)
     }
     func reviewed(_ session: Session) {
+        pendingUnpins.removeValue(forKey: session.id)?.cancel()
         if preferences.pins.contains(session.id) {
             preferences.reviewed[session.id] = session.completionKey
             cardPresses[session.id, default: 0] += 1

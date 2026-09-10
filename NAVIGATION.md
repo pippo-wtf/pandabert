@@ -24,7 +24,7 @@ Optional identity fields preserve decoding of existing PandaBert snapshots and p
 
 ## Validation
 
-The full suite passes: **58 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
+The full suite passes: **60 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
 
 The release app and embedded collector were rebuilt and locally signature-verified. Live navigation results are recorded in `VALIDATION.md`.
 
@@ -44,4 +44,4 @@ Acknowledged cards leave Needs you with a 0.3-second rubber-band motion: a short
 
 ## Pins and kept cards — 0.4.4
 
-Pin changes and pinned acknowledgements use a brief press-in animation without an exit. The card list preserves each card's identity when it moves into the pinned group. Unpinning retains its position in a Kept in sight group, even if the response was already seen; that order survives relaunches and observation outages. Only a later Mark as seen or successful Open thread acknowledgement releases the unpinned card. Failed opens and delayed callbacks for older completions do not release it. Pinned cards stay pinned after either action. Existing attention rules for questions and independent GitHub alerts remain unchanged. Reduced Motion disables the press movement.
+Pin changes and pinned acknowledgements use a brief press-in animation without an exit. The card list preserves each card's identity when it moves into the pinned group. Unpinning pauses in place for 350 ms, then gently returns an unseen card that still needs attention to Needs you. Repinning or acknowledging during the pause cancels that return. Already-seen cards retain their position in Kept in sight until a later Mark as seen or successful Open thread acknowledgement; that retained order survives relaunches and observation outages. Failed opens and delayed callbacks for older completions do not release it. Pinned cards stay pinned after either action. Existing attention rules for questions and independent GitHub alerts remain unchanged. Reduced Motion disables the press movement.
