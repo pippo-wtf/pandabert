@@ -14,7 +14,7 @@ public enum GitHub {
         } catch { result.error = "GitHub unavailable; check gh authentication"; return result }
     }
     public static func parse(_ data: Data, url: String, now: Date = Date()) throws -> PullRequest {
-        guard let o = try JSONSerialization.jsonObject(with: data) as? [String: Any], let state = o["state"] as? String else { throw PulseError.message("Invalid GitHub response") }
+        guard let o = try JSONSerialization.jsonObject(with: data) as? [String: Any], let state = o["state"] as? String else { throw PandaError.message("Invalid GitHub response") }
         var r = PullRequest(url: url); r.state = state; r.title = o["title"] as? String ?? ""; r.review = o["reviewDecision"] as? String ?? ""
         r.requestedReviewers = (o["reviewRequests"] as? [Any])?.count ?? 0
         r.checksFailed = (o["statusCheckRollup"] as? [[String: Any]] ?? []).contains { ["FAILURE", "ERROR", "TIMED_OUT", "ACTION_REQUIRED"].contains(($0["conclusion"] ?? $0["state"]) as? String ?? "") }

@@ -1,9 +1,9 @@
 import Foundation
 import SwiftUI
-import PulseCore
+import PandaCore
 import AppKit
 
-final class PulseStore: ObservableObject {
+final class PandaStore: ObservableObject {
     @Published var sessions: [Session] = []
     @Published var coverage: [Coverage] = []
     @Published var preferences = Preferences()
@@ -14,8 +14,8 @@ final class PulseStore: ObservableObject {
     @Published var navigationError: String?
     @Published var latestArrival: AttentionArrival?
     private var arrivalTracker = AttentionArrivalTracker()
-    let root = PulsePaths.data
-    private let queue = DispatchQueue(label: "pulse.collector", qos: .utility)
+    let root = PandaPaths.data
+    private let queue = DispatchQueue(label: "panda.collector", qos: .utility)
     private var collector: Collector?
     private var remoteCache: [String: Snapshot] = [:]
     private var remoteErrors: [String: String] = [:]
@@ -33,7 +33,7 @@ final class PulseStore: ObservableObject {
             do { preferences = try JSONDecoder().decode(Preferences.self, from: Data(contentsOf: path)) }
             catch { preferenceError = "Saved preferences could not be read. Existing file was preserved."; issues = [preferenceError!] }
         } else {
-            do { try PulsePaths.save(preferences, to: path) }
+            do { try PandaPaths.save(preferences, to: path) }
             catch { preferenceError = "Could not save initial preferences: \(error.localizedDescription)" }
         }
         pinnedCache = (try? Data(contentsOf: root.appendingPathComponent("pinned-sessions.json"))).flatMap { try? JSONDecoder().decode([Session].self, from: $0) } ?? []
@@ -43,9 +43,9 @@ final class PulseStore: ObservableObject {
     func save() {
         guard preferenceError == nil else { return }
         do {
-            try PulsePaths.save(preferences, to: root.appendingPathComponent("preferences.json"))
+            try PandaPaths.save(preferences, to: root.appendingPathComponent("preferences.json"))
             pinnedCache = preferences.pins.compactMap { id in sessions.first { $0.id == id } ?? pinnedCache.first { $0.id == id } }
-            try PulsePaths.save(pinnedCache, to: root.appendingPathComponent("pinned-sessions.json"))
+            try PandaPaths.save(pinnedCache, to: root.appendingPathComponent("pinned-sessions.json"))
         }
         catch { issues.append("Could not save preferences: \(error.localizedDescription)") }
         onTopChanged?(preferences.alwaysOnTop)

@@ -18,7 +18,7 @@ Describe the problem and what you expected instead.
 
 ## Environment
 
-- Pulse version:
+- Panda version:
 - macOS version:
 - Claude / Codex app or CLI version:
 - Desktop or terminal:
@@ -26,6 +26,6 @@ Describe the problem and what you expected instead.
 
 ## Evidence
 
-Optional: an anonymized screenshot or Pulse diagnostic export from Connections.
+Optional: an anonymized screenshot or Panda diagnostic export from Connections.
 
 Please remove private task text, account details and paths. Do not attach credentials or full provider logs.

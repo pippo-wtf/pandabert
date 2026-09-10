@@ -1,4 +1,6 @@
-# Pulse 0.1.0 validation — 2026-09-10
+# Validation history
+
+## Pulse 0.1.0 — 2026-09-10
 
 ## Verified
 
@@ -77,3 +79,13 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Halved the newest-notification outline opacity from 0.65 to 0.325. Increased both halo-layer opacity factors by 30%; the halo is rendered separately so reducing the sharp outline does not also weaken the glow.
 - Timing, notification detection, pin outlines and status dots are unchanged.
 - Release build and local signature verification passed. Inspected the active glow in the isolated native sample preview. This is a presentation-only change; the unchanged 28-test suite was last run for 0.1.5 and was not rerun for this adjustment.
+
+
+## Panda rename — 0.2.0
+
+- Renamed the native panel, window, menu labels, app bundle/display name, package/modules, collector, diagnostic filename and current documentation to Panda. Refreshed all four README screenshots using fictional tasks in the renamed native interface.
+- The packaged app is `dist/Panda.app`, with `panda-agent` and a `pulse-agent` executable alias. Remote observation prefers the new collector name and falls back to legacy installations; the snapshot protocol remains 1.
+- Kept the existing app bundle identifier, window-position key and `Application Support/Pulse` data location for compatibility. `PANDA_HOME` is the preferred override, with `PULSE_HOME` retained as a fallback.
+- All **31 tests passed**, including new compatibility coverage for the data path and both environment overrides. Release build and local signature verification passed; both collector names report 0.2.0.
+- The real Panda app launched successfully. Hashes of existing preferences, pinned-task cache and machine identity were unchanged after launch. The old local `Pulse.app` shortcut resolves to `Panda.app`; the previous build was retained in ignored local build output. Login-at-login behavior across a full reboot was not exercised.
+- This is a naming/compatibility update; the issues identified by the prior code review remain unresolved.

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import PulseCore
+import PandaCore
 import ServiceManagement
 
 let ink = Color(red: 0.098, green: 0.094, blue: 0.125)
@@ -8,7 +8,7 @@ let lavender = Color(red: 0.608, green: 0.529, blue: 0.961)
 let neutralSurface = Color(white: 0.97)
 
 struct PanelView: View {
-    @ObservedObject var store: PulseStore
+    @ObservedObject var store: PandaStore
     @State private var expanded = false
     @State private var selected: Session?
     @State private var settings = false
@@ -21,7 +21,7 @@ struct PanelView: View {
         VStack(spacing: 0) {
             HStack(spacing: 9) {
                 Image(systemName: "circle.circle.fill").font(.system(size: 21, weight: .bold))
-                Text("Pulse").font(.system(size: 14, weight: .semibold))
+                Text("Panda").font(.system(size: 14, weight: .semibold))
                 Spacer(minLength: 2)
                 Menu {
                     Button("All projects") { project = "" }
@@ -56,7 +56,7 @@ struct PanelView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Image(systemName: "sparkle").foregroundStyle(lavender).font(.system(size: 22))
                             Text(store.sessions.isEmpty ? "Your activity will appear here." : "Nothing needs your attention here.").font(.system(size: 13, weight: .medium))
-                            Text(store.sessions.isEmpty ? "Add your profile folders in Connections. Pulse observes Claude Code and Codex logs on this Mac." : "Keep this panel nearby. Pin any task you want to keep in sight.").font(.system(size: 11)).foregroundStyle(.secondary)
+                            Text(store.sessions.isEmpty ? "Add your profile folders in Connections. Panda observes Claude Code and Codex logs on this Mac." : "Keep this panel nearby. Pin any task you want to keep in sight.").font(.system(size: 11)).foregroundStyle(.secondary)
                         }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
                     }
                     Button { expanded.toggle() } label: {
@@ -124,7 +124,7 @@ struct PanelView: View {
 }
 
 struct OpenThreadButton: View {
-    @ObservedObject var store: PulseStore
+    @ObservedObject var store: PandaStore
     let session: Session
     var body: some View {
         let link = ThreadLink(session: session, localMachineID: store.localMachineID)
@@ -135,7 +135,7 @@ struct OpenThreadButton: View {
 }
 
 struct DetailView: View {
-    @ObservedObject var store: PulseStore
+    @ObservedObject var store: PandaStore
     let original: Session
     @Environment(\.dismiss) var dismiss
     @State private var waiting = ""
@@ -158,8 +158,8 @@ struct DetailView: View {
             TextField("Project display name", text: $alias)
             HStack {
                 Button("Save") {
-                    store.preferences.waits[s.id] = waiting.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : PulseCore.clipped(waiting)
-                    store.preferences.projectAliases[s.projectKey] = alias.isEmpty ? nil : PulseCore.clipped(alias, 60); store.save()
+                    store.preferences.waits[s.id] = waiting.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : PandaCore.clipped(waiting)
+                    store.preferences.projectAliases[s.projectKey] = alias.isEmpty ? nil : PandaCore.clipped(alias, 60); store.save()
                 }
                 Button(store.preferences.pins.contains(s.id) ? "Unpin" : "Pin task") { store.pin(s) }
                 if s.activity == .finished { Button("Mark reviewed") { store.reviewed(s); dismiss() } }
@@ -171,13 +171,13 @@ struct DetailView: View {
                     Button("Reveal transcript") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: s.sourcePath)]) }
                 }
             }
-            Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; Pulse does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
+            Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; Panda does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
         }.padding(22).frame(width: 390).onAppear { waiting = store.preferences.waits[s.id] ?? ""; alias = store.preferences.projectName(s) }
     }
 }
 
 struct SettingsView: View {
-    @ObservedObject var store: PulseStore
+    @ObservedObject var store: PandaStore
     @Environment(\.dismiss) var dismiss
     @State private var provider = Provider.codex
     @State private var profileLabel = ""
@@ -197,12 +197,12 @@ struct SettingsView: View {
                         }
                     }
                     Toggle("Keep the panel above other windows", isOn: $store.preferences.alwaysOnTop).onChange(of: store.preferences.alwaysOnTop) { _ in store.save() }
-                    Toggle("Open Pulse when I log in", isOn: Binding(get: { startsAtLogin }, set: { enabled in
+                    Toggle("Open Panda when I log in", isOn: Binding(get: { startsAtLogin }, set: { enabled in
                         do {
                             if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
                             startsAtLogin = SMAppService.mainApp.status == .enabled
-                            settingsMessage = SMAppService.mainApp.status == .requiresApproval ? "Allow Pulse in System Settings → Login Items." : ""
-                        } catch { settingsMessage = "Login setup unavailable. Move Pulse to Applications and try again." }
+                            settingsMessage = SMAppService.mainApp.status == .requiresApproval ? "Allow Panda in System Settings → Login Items." : ""
+                        } catch { settingsMessage = "Login setup unavailable. Move Panda to Applications and try again." }
                     }))
                     Toggle("Show finished turns for review", isOn: $store.preferences.showFinished).onChange(of: store.preferences.showFinished) { _ in store.save() }
                     Toggle("Check linked pull requests using GitHub CLI", isOn: $store.preferences.githubEnabled).onChange(of: store.preferences.githubEnabled) { _ in store.save(); store.refresh(force: true) }
@@ -219,11 +219,11 @@ struct SettingsView: View {
                     TextField("Profile label, e.g. Personal", text: $profileLabel)
                     TextField("Profile root, e.g. ~/.codex-work", text: $profileRoot)
                     Button("Add profile folder") {
-                        let p = Profile(provider: provider, label: PulseCore.clipped(profileLabel, 50), root: profileRoot)
+                        let p = Profile(provider: provider, label: PandaCore.clipped(profileLabel, 50), root: profileRoot)
                         if !store.preferences.profiles.contains(where: { $0.id == p.id }) { store.preferences.profiles.append(p) }
                         store.save(); profileLabel = ""; profileRoot = ""; store.refresh(force: true)
                     }.disabled(profileLabel.isEmpty || !(profileRoot.hasPrefix("/") || profileRoot.hasPrefix("~/")))
-                    Text("Choose the folder containing sessions (Codex) or projects (Claude). Profiles are labelled by you; Pulse never guesses which account owns a folder.").font(.caption).foregroundStyle(.secondary)
+                    Text("Choose the folder containing sessions (Codex) or projects (Claude). Profiles are labelled by you; Panda never guesses which account owns a folder.").font(.caption).foregroundStyle(.secondary)
                     Divider()
                     Text("Other machines").font(.headline)
                     ForEach(store.preferences.remotes) { remote in
@@ -232,16 +232,16 @@ struct SettingsView: View {
                     TextField("Machine label", text: $remoteLabel)
                     TextField("Existing SSH alias or user@host", text: $remoteHost)
                     Button("Connect machine") {
-                        store.preferences.remotes.append(RemoteMachine(label: PulseCore.clipped(remoteLabel, 50), sshHost: remoteHost)); store.save(); remoteHost = ""; remoteLabel = ""; store.refresh(force: true)
+                        store.preferences.remotes.append(RemoteMachine(label: PandaCore.clipped(remoteLabel, 50), sshHost: remoteHost)); store.save(); remoteHost = ""; remoteLabel = ""; store.refresh(force: true)
                     }.disabled(remoteLabel.isEmpty || !RemoteMachine(label: remoteLabel, sshHost: remoteHost).isValid)
-                    Text("Requires an already trusted SSH connection and pulse-agent at ~/.local/bin/pulse-agent on that Mac. Credentials stay on their original machines. Connections bring task excerpts to this Mac.").font(.caption).foregroundStyle(.secondary)
+                    Text("Requires an already trusted SSH connection and panda-agent at ~/.local/bin/panda-agent on that Mac. Credentials stay on their original machines. Connections bring task excerpts to this Mac.").font(.caption).foregroundStyle(.secondary)
                     Divider()
                     Text("Observed coverage").font(.headline)
                     Button("Export diagnostics (no task text)") {
-                        let panel = NSSavePanel(); panel.nameFieldStringValue = "pulse-diagnostics.json"
+                        let panel = NSSavePanel(); panel.nameFieldStringValue = "panda-diagnostics.json"
                         guard panel.runModal() == .OK, let url = panel.url else { return }
                         let counts = Dictionary(grouping: store.sessions, by: { $0.displayActivity().rawValue }).mapValues(\.count)
-                        let report: [String: Any] = ["version": pulseVersion, "generatedAt": ISO8601DateFormatter().string(from: Date()), "sessionCount": store.sessions.count, "projectCount": Set(store.sessions.map(\.projectKey)).count, "stateCounts": counts, "profileCount": store.preferences.profiles.count, "remoteCount": store.preferences.remotes.count, "availableSources": store.coverage.filter(\.available).count, "issueCount": store.issues.count]
+                        let report: [String: Any] = ["version": pandaVersion, "generatedAt": ISO8601DateFormatter().string(from: Date()), "sessionCount": store.sessions.count, "projectCount": Set(store.sessions.map(\.projectKey)).count, "stateCounts": counts, "profileCount": store.preferences.profiles.count, "remoteCount": store.preferences.remotes.count, "availableSources": store.coverage.filter(\.available).count, "issueCount": store.issues.count]
                         do { try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]).write(to: url, options: .atomic); settingsMessage = "Diagnostics saved." }
                         catch { settingsMessage = "Diagnostics could not be saved." }
                     }
@@ -249,7 +249,7 @@ struct SettingsView: View {
                     ForEach(Array(store.coverage.enumerated()), id: \.offset) { _, c in
                         Text("\(c.provider.label) · \(c.profile): \(c.fileCount) sessions\n\(c.message)").font(.caption).foregroundStyle(.secondary)
                     }
-                    Text("Version \(pulseVersion) · Preview\nPassive Claude Code / Codex logs only. Claude ordinary Chat and Cowork are not connected. Some approvals and queued states are absent from these logs; quiet working sessions become uncertain after three minutes. Large logs are read in bounded chunks. Refresh: 5 seconds locally, 30 seconds remotely.").font(.caption).foregroundStyle(.secondary)
+                    Text("Version \(pandaVersion) · Preview\nPassive Claude Code / Codex logs only. Claude ordinary Chat and Cowork are not connected. Some approvals and queued states are absent from these logs; quiet working sessions become uncertain after three minutes. Large logs are read in bounded chunks. Refresh: 5 seconds locally, 30 seconds remotely.").font(.caption).foregroundStyle(.secondary)
                 }
             }
         }.padding(22).frame(width: 430, height: 610)

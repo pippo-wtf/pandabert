@@ -1,5 +1,5 @@
 import XCTest
-@testable import PulseCore
+@testable import PandaCore
 
 final class AttentionArrivalTests: XCTestCase {
     let now = Date(timeIntervalSince1970: 1_800_000_000)

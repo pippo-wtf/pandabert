@@ -1,7 +1,7 @@
 import XCTest
-@testable import PulseCore
+@testable import PandaCore
 
-final class PulseCoreTests: XCTestCase {
+final class PandaCoreTests: XCTestCase {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
     func reducer(_ provider: Provider = .codex) -> SessionReducer {
         SessionReducer(Session(nativeID: "session-1", profile: Profile(provider: provider, label: "Test", root: "/tmp/test-profile"), machineID: "machine-1", machine: "Test Mac"))

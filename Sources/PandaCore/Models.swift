@@ -1,8 +1,8 @@
 import Foundation
 import CryptoKit
 
-public let pulseVersion = "0.1.6"
-public let pulseProtocolVersion = 1
+public let pandaVersion = "0.2.0"
+public let pandaProtocolVersion = 1
 
 public enum Provider: String, Codable, CaseIterable { case claude, codex
     public var label: String { self == .claude ? "Claude" : "Codex" }
@@ -113,8 +113,8 @@ public struct Coverage: Codable, Equatable {
     }
 }
 public struct Snapshot: Codable {
-    public var protocolVersion = pulseProtocolVersion
-    public var version = pulseVersion
+    public var protocolVersion = pandaProtocolVersion
+    public var version = pandaVersion
     public var machineID: String
     public var machine: String
     public var generatedAt: Date
@@ -166,14 +166,20 @@ public func summary(_ value: String, limit: Int = 100) -> String {
     let useful = lines.first { !$0.isEmpty && !$0.hasPrefix("<") && !$0.hasPrefix("#") && !$0.hasPrefix("```") } ?? ""
     return clipped(useful, limit)
 }
-public enum PulseError: LocalizedError {
+public enum PandaError: LocalizedError {
     case message(String)
     public var errorDescription: String? { if case .message(let s) = self { return s }; return nil }
 }
-public enum PulsePaths {
+public enum PandaPaths {
     public static var data: URL {
-        if let override = ProcessInfo.processInfo.environment["PULSE_HOME"] { return URL(fileURLWithPath: override) }
-        return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Pulse")
+        data(environment: ProcessInfo.processInfo.environment, home: FileManager.default.homeDirectoryForCurrentUser)
+    }
+    public static func data(environment: [String: String], home: URL) -> URL {
+        if let override = environment["PANDA_HOME"] ?? environment["PULSE_HOME"] {
+            return URL(fileURLWithPath: override)
+        }
+        // Keep the existing data location so renaming does not reset identity or preferences.
+        return home.appendingPathComponent("Library/Application Support/Pulse")
     }
     public static func prepare(_ root: URL) throws {
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
@@ -187,7 +193,7 @@ public enum PulsePaths {
         let fd = open(path.path, O_WRONLY | O_CREAT | O_EXCL, 0o600)
         if fd >= 0 { _ = value.withCString { write(fd, $0, strlen($0)) }; close(fd); return value }
         if let existing = try? String(contentsOf: path), UUID(uuidString: existing) != nil { return existing }
-        throw PulseError.message("Cannot create the local machine identity")
+        throw PandaError.message("Cannot create the local machine identity")
     }
     public static func save<T: Encodable>(_ value: T, to path: URL) throws {
         try prepare(path.deletingLastPathComponent())

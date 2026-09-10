@@ -1,5 +1,5 @@
 import XCTest
-@testable import PulseCore
+@testable import PandaCore
 
 final class ThreadLinkTests: XCTestCase {
     let id = "12345678-1234-4234-8234-123456789abc"

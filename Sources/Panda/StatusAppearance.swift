@@ -1,5 +1,5 @@
 import SwiftUI
-import PulseCore
+import PandaCore
 
 enum StatusTone: CaseIterable {
     case active, attention, complete, quiet

@@ -1,5 +1,5 @@
 import SwiftUI
-import PulseCore
+import PandaCore
 
 struct AttentionGlow: View {
     let arrival: AttentionArrival

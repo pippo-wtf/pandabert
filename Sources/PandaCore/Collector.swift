@@ -5,8 +5,8 @@ public final class Collector {
     private var repos: [String: String] = [:]
     public let machineID: String
     public let machine: String
-    public init(root: URL = PulsePaths.data) throws {
-        machineID = try PulsePaths.machineID(root: root)
+    public init(root: URL = PandaPaths.data) throws {
+        machineID = try PandaPaths.machineID(root: root)
         machine = Host.current().localizedName ?? ProcessInfo.processInfo.hostName
     }
     public func snapshot(profiles: [Profile], now: Date = Date()) -> Snapshot {
@@ -122,26 +122,26 @@ public enum Command {
         if finished.wait(timeout: .now() + timeout) == .timedOut {
             p.terminate()
             if finished.wait(timeout: .now() + 1) == .timedOut { kill(p.processIdentifier, SIGKILL); _ = finished.wait(timeout: .now() + 1) }
-            throw PulseError.message("Command timed out")
+            throw PandaError.message("Command timed out")
         }
-        guard readDone.wait(timeout: .now() + 2) == .success else { throw PulseError.message("Output stream did not close") }
+        guard readDone.wait(timeout: .now() + 2) == .success else { throw PandaError.message("Output stream did not close") }
         lock.lock(); defer { lock.unlock() }
-        guard !overflow, p.terminationStatus == 0 else { throw PulseError.message(overflow ? "Response too large" : "Command failed (\(p.terminationStatus))") }
+        guard !overflow, p.terminationStatus == 0 else { throw PandaError.message(overflow ? "Response too large" : "Command failed (\(p.terminationStatus))") }
         return output
     }
 }
 
 public enum RemoteReader {
     public static func snapshot(_ remote: RemoteMachine, now: Date = Date()) throws -> Snapshot {
-        guard remote.isValid else { throw PulseError.message("Invalid SSH host") }
-        let data = try Command.run("/usr/bin/ssh", ["-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "-o", "StrictHostKeyChecking=yes", remote.sshHost, "exec \"$HOME/.local/bin/pulse-agent\" snapshot"], timeout: 15)
+        guard remote.isValid else { throw PandaError.message("Invalid SSH host") }
+        let data = try Command.run("/usr/bin/ssh", ["-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "-o", "StrictHostKeyChecking=yes", remote.sshHost, "if [ -x \"$HOME/.local/bin/panda-agent\" ]; then exec \"$HOME/.local/bin/panda-agent\" snapshot; else exec \"$HOME/.local/bin/pulse-agent\" snapshot; fi"], timeout: 15)
         return try decode(data, now: now)
     }
     public static func decode(_ data: Data, now: Date = Date()) throws -> Snapshot {
-        guard data.count <= 8 * 1024 * 1024 else { throw PulseError.message("Remote response too large") }
+        guard data.count <= 8 * 1024 * 1024 else { throw PandaError.message("Remote response too large") }
         let s = try JSONDecoder().decode(Snapshot.self, from: data)
-        guard s.protocolVersion == pulseProtocolVersion, abs(now.timeIntervalSince(s.generatedAt)) < 120, s.sessions.count <= 1000,
-              s.sessions.allSatisfy({ $0.machineID == s.machineID && $0.id == stableID(s.machineID + ":" + $0.profileID + ":" + $0.nativeID) }) else { throw PulseError.message("Remote snapshot is stale or incompatible") }
+        guard s.protocolVersion == pandaProtocolVersion, abs(now.timeIntervalSince(s.generatedAt)) < 120, s.sessions.count <= 1000,
+              s.sessions.allSatisfy({ $0.machineID == s.machineID && $0.id == stableID(s.machineID + ":" + $0.profileID + ":" + $0.nativeID) }) else { throw PandaError.message("Remote snapshot is stale or incompatible") }
         return s
     }
 }
