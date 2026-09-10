@@ -1,6 +1,6 @@
 # Contributing to Pulse
 
-Pulse is a private preview. Small, focused changes are easiest to review.
+Pulse is a public preview. Small, focused changes are easiest to review.
 
 ## Report a problem
 

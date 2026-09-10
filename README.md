@@ -4,7 +4,7 @@
 
 Pulse is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.1.4 · Private preview · Apple Silicon · macOS 13+**
+**Current version: 0.1.4 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="Pulse attention panel with a pinned working task and a task that needs an answer" width="364">
@@ -64,7 +64,7 @@ Additional profile folders can be labelled in Connections. A collector can also 
 
 ## Get started
 
-You need an Apple Silicon Mac running macOS 13 or later, the full Xcode toolchain, and access to this private repository.
+You need an Apple Silicon Mac running macOS 13 or later, and the full Xcode toolchain.
 
 ```sh
 git clone https://github.com/pippo-wtf/pulse.git
@@ -105,7 +105,7 @@ Found a status that looks wrong or a link that will not open? [Open an issue](ht
 
 [Contributing and development guide](CONTRIBUTING.md) · [Navigation behavior](NAVIGATION.md) · [Validation history](VALIDATION.md)
 
-This repository is a private preview. No open-source license has been granted in this repository.
+This repository is a public preview. No open-source license has been granted in this repository.
 
 ## Research provenance
 
