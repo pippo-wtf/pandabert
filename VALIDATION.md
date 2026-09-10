@@ -89,3 +89,10 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - All **31 tests passed**, including new compatibility coverage for the data path and both environment overrides. Release build and local signature verification passed; both collector names report 0.2.0.
 - The real Panda app launched successfully. Hashes of existing preferences, pinned-task cache and machine identity were unchanged after launch. The old local `Pulse.app` shortcut resolves to `Panda.app`; the previous build was retained in ignored local build output. Login-at-login behavior across a full reboot was not exercised.
 - This is a naming/compatibility update; the issues identified by the prior code review remain unresolved.
+
+
+## Brand subline — 0.2.1
+
+- Added “Keeps you on track” directly beneath Panda in the compact header and as the README subline. Tightened header spacing and kept the attention count on one line.
+- Release build and local signature verification passed. Native sample-data inspection confirmed the full subline, project selector and one-line count fit at the default 364-point panel width. Refreshed the header-bearing README screenshots.
+- Presentation-only change. The 31-test suite was last run for 0.2.0; it was not rerun for this text/layout adjustment.

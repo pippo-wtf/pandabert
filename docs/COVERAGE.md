@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-Panda 0.2.0 is a local preview. These limits describe the implementation, not a promise of future delivery.
+Panda 0.2.1 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Known coverage limits
 

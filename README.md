@@ -1,12 +1,12 @@
 # Panda
 
-**Keep your agent work in sight. Know when it needs you.**
+**Keeps you on track**
 
 Panda is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
 Previously called Pulse. Existing settings and pins carry over.
 
-**Current version: 0.2.0 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.2.1 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="Panda attention panel with a pinned working task and a task that needs an answer" width="364">
@@ -61,7 +61,7 @@ Labels accompany the dots. Cards stay neutral, and lavender controls use white t
   <img src="docs/screenshots/notification-glow.jpg" alt="Panda showing a soft lavender halo around the newest task needing attention, with a faint outline and neutral card surface" width="364">
 </p>
 
-The newest attention item glows softly for 30 seconds, with an eight-second breathing cycle and a gentle fade. This still image captures the glow in Panda 0.2.0; the pin above it keeps its usual subtle outline.
+The newest attention item glows softly for 30 seconds, with an eight-second breathing cycle and a gentle fade. This still image captures the glow in Panda 0.2.1; the pin above it keeps its usual subtle outline.
 
 All screenshots use sample data. [Screenshot notes](docs/screenshots/README.md).
 

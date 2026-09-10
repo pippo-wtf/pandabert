@@ -19,9 +19,12 @@ struct PanelView: View {
     private var needsCount: Int { store.sessions.filter { store.preferences.needsAttention($0) }.count }
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 9) {
+            HStack(spacing: 7) {
                 Image(systemName: "circle.circle.fill").font(.system(size: 21, weight: .bold))
-                Text("Panda").font(.system(size: 14, weight: .semibold))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Panda").font(.system(size: 14, weight: .semibold))
+                    Text("Keeps you on track").font(.system(size: 8)).foregroundStyle(.white.opacity(0.72))
+                }.fixedSize(horizontal: true, vertical: false)
                 Spacer(minLength: 2)
                 Menu {
                     Button("All projects") { project = "" }
@@ -31,7 +34,7 @@ struct PanelView: View {
                 } label: {
                     HStack(spacing: 4) { Text(project.isEmpty ? "All projects" : store.sessions.first(where: { $0.projectKey == project }).map { store.preferences.projectName($0) } ?? "Project").lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 8)) }.font(.system(size: 10))
                 }.menuStyle(.borderlessButton).environment(\.colorScheme, .dark).fixedSize().frame(maxWidth: 105)
-                Text("\(needsCount) need you").font(.system(size: 10, weight: .semibold)).foregroundStyle(.white).padding(.horizontal, 9).padding(.vertical, 7).background(lavender, in: Capsule())
+                Text("\(needsCount) need you").font(.system(size: 10, weight: .semibold)).lineLimit(1).fixedSize(horizontal: true, vertical: false).foregroundStyle(.white).padding(.horizontal, 9).padding(.vertical, 7).background(lavender, in: Capsule())
             }.foregroundStyle(.white).padding(.horizontal, 13).frame(height: 43).background(ink, in: Capsule()).padding(16)
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
