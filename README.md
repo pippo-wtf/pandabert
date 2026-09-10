@@ -4,7 +4,7 @@
 
 Pulse is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.1.5 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.1.6 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="Pulse attention panel with a pinned working task and a task that needs an answer" width="364">

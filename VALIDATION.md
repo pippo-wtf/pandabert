@@ -70,3 +70,10 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Reduce Motion uses a steady highlight with the same entry/exit fade, without the breathing cycle. The overlay does not intercept clicks or enter the accessibility tree; its timeline is removed after expiration.
 - All **28 tests passed**, including seven new notification-detection regression tests. Output: `.build/test-results-0.1.5.txt`.
 - Release build and local signature verification passed. Native UI inspection used an isolated sample-data copy with the production views and arrival logic: the target card glowed, the pinned card retained its usual outline, and the glow disappeared after the time window. This is fixture-driven UI verification, not a newly recorded live-provider notification test. Reduce Motion behavior was implemented but not toggled in the user's system settings during verification.
+
+
+## Softer outline, stronger halo — 0.1.6
+
+- Halved the newest-notification outline opacity from 0.65 to 0.325. Increased both halo-layer opacity factors by 30%; the halo is rendered separately so reducing the sharp outline does not also weaken the glow.
+- Timing, notification detection, pin outlines and status dots are unchanged.
+- Release build and local signature verification passed. Inspected the active glow in the isolated native sample preview. This is a presentation-only change; the unchanged 28-test suite was last run for 0.1.5 and was not rerun for this adjustment.

@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-Pulse 0.1.5 is a local preview. These limits describe the implementation, not a promise of future delivery.
+Pulse 0.1.6 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Known coverage limits
 
