@@ -18,10 +18,10 @@ final class ThreadLinkTests: XCTestCase {
         s = session(.claude); s.bridgeSessionID = "cse_abc?prompt=doSomething"; s.desktopSessionID = "local_new&prompt=doSomething"
         XCTAssertNil(ThreadLink(session: s, localMachineID: s.machineID).url)
     }
-    func testVerifiedLocalConversationPreferredAndBridgeUsedRemotely() {
+    func testLocalDesktopMappingNeverOpensOnAnotherMachine() {
         var s = session(.claude); s.bridgeSessionID = "cse_123ABC"; s.desktopSessionID = "local_" + id
         XCTAssertEqual(ThreadLink(session: s, localMachineID: s.machineID).url?.absoluteString, "claude://claude.ai/epitaxy/local_" + id)
-        XCTAssertEqual(ThreadLink(session: s, localMachineID: "another-machine").url?.absoluteString, "claude://claude.ai/code/session_123ABC")
+        XCTAssertNil(ThreadLink(session: s, localMachineID: "another-machine").url)
     }
     func testDesktopAliasIsExplicitAndTerminalIsNotImported() {
         var s = session(.claude)
@@ -29,6 +29,39 @@ final class ThreadLinkTests: XCTestCase {
         s.desktopSessionID = "local_" + id
         XCTAssertEqual(ThreadLink(session: s, localMachineID: s.machineID).url?.absoluteString, "claude://claude.ai/epitaxy/local_" + id)
         XCTAssertNil(ThreadLink(session: s, localMachineID: "remote").url)
+    }
+    func testBridgeIDsAloneNeverEnableDesktopNavigation() {
+        for bridge in ["cse_123ABC", "session_123ABC"] {
+            var s = session(.claude); s.bridgeSessionID = bridge
+            XCTAssertNil(ThreadLink(session: s, localMachineID: s.machineID).url)
+            XCTAssertNil(ThreadLink(session: s, localMachineID: "remote").url)
+        }
+    }
+    func testClickRevalidatesDeletedAndChangedDesktopRecords() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = root.appendingPathComponent("account/org")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        var s = session(.claude); s.desktopSessionID = "local_" + id; s.bridgeSessionID = "cse_123ABC"
+        // An old pinned snapshot must not be enough to open a deleted conversation.
+        XCTAssertNil(ThreadLink.revalidated(session: s, localMachineID: s.machineID, desktopRoot: root).url)
+        let desktop = "local_" + UUID().uuidString
+        let file = folder.appendingPathComponent(desktop + ".json")
+        try JSONSerialization.data(withJSONObject: ["sessionId": desktop, "cliSessionId": id]).write(to: file)
+        XCTAssertEqual(ThreadLink.revalidated(session: s, localMachineID: s.machineID, desktopRoot: root).url?.absoluteString, "claude://claude.ai/epitaxy/" + desktop)
+        try FileManager.default.removeItem(at: file)
+        XCTAssertNil(ThreadLink.revalidated(session: s, localMachineID: s.machineID, desktopRoot: root).url)
+    }
+    func testAmbiguousDesktopRecordsDoNotEnableNavigation() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = root.appendingPathComponent("account/org")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for _ in 0..<2 {
+            let desktop = "local_" + UUID().uuidString
+            try JSONSerialization.data(withJSONObject: ["sessionId": desktop, "cliSessionId": id]).write(to: folder.appendingPathComponent(desktop + ".json"))
+        }
+        XCTAssertNil(ThreadLink.revalidated(session: session(.claude), localMachineID: "local-machine", desktopRoot: root).url)
     }
     func testBridgeMetadataAndOldSnapshotCompatibility() throws {
         var r = SessionReducer(session(.claude)); r.apply(["type": "user", "bridgeSessionId": "cse_123ABC"])

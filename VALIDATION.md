@@ -51,3 +51,13 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Restored neutral cards and the original lavender accent. Only the small status dots carry active/attention/finished/waiting colors; the legend also uses dots rather than colored pills.
 - Lavender button and toolbar-pill labels remain white. Pins use a subtle outline without changing card backgrounds.
 - Release build and local signature verification passed. Status classification is unchanged from 0.1.2; this revision adjusts presentation only.
+
+
+## Claude unavailable-link fix — 0.1.4
+
+- Removed bridge-only navigation. A valid bridge ID can refer to a conversation unavailable in the signed-in desktop app; it no longer enables the button locally or remotely.
+- Claude navigation requires an explicit local CLI-to-desktop mapping. The mapping is loaded again on click, including for cached/pinned tasks, and missing or ambiguous records prevent dispatch.
+- All **21 tests passed**, including bridge-only rejection and deleted, changed and ambiguous mappings. Output: `.build/test-results-0.1.4.txt`.
+- Release build and local signature verification passed; the embedded collector reports version 0.1.4.
+- Account authorization remains owned by Claude. Local identity metadata does not independently establish access for a different signed-in account.
+- Live native panel verification: the previously failing bridge-only task now has a disabled Open thread button and an unavailable-mapping explanation. The neutral cards and subtle status dots are preserved. No message was sent or task marked reviewed.

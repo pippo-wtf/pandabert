@@ -51,7 +51,7 @@ final class PulseStore: ObservableObject {
     func pin(_ session: Session) { preferences.togglePin(session.id); save() }
     func reviewed(_ session: Session) { preferences.reviewed[session.id] = session.completionKey; save() }
     func openThread(_ session: Session) {
-        let link = ThreadLink(session: session, localMachineID: localMachineID)
+        let link = ThreadLink.revalidated(session: session, localMachineID: localMachineID)
         guard let url = link.url else { navigationError = link.explanation; return }
         guard let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: link.bundleID) else {
             navigationError = "\(session.provider.label) is not installed or registered on this Mac."; return

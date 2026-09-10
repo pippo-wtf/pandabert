@@ -15,15 +15,18 @@ public struct ThreadLink {
         } else if isLocal, let desktop = session.desktopSessionID, desktop.hasPrefix("local_"), UUID(uuidString: String(desktop.dropFirst(6))) != nil {
             url = URL(string: "claude://claude.ai/epitaxy/" + desktop)
             explanation = "Open this existing Claude desktop conversation."
-        } else if let bridge = session.bridgeSessionID, bridge.range(of: "^(cse|session)_[A-Za-z0-9_-]{1,128}$", options: .regularExpression) != nil {
-            // Claude's session store normalizes CLI bridge IDs to the server's session_ form.
-            let serverID = bridge.hasPrefix("cse_") ? "session_" + bridge.dropFirst(4) : bridge
-            url = URL(string: "claude://claude.ai/code/" + serverID)
-            explanation = "Open the linked Claude conversation using the account signed in to Claude."
         } else {
             url = nil
-            explanation = isLocal ? "This terminal session has no linked desktop conversation. Its session ID is available in Details." : "This session lives on \(session.machine) and has no linked Claude desktop conversation."
+            explanation = isLocal ? "No matching Claude desktop conversation was found on this Mac. A terminal or bridge ID alone cannot open a chat." : "This session lives on \(session.machine) and has no linked Claude desktop conversation."
         }
+    }
+    /// Refresh identity evidence at click time, including for cached or pinned tasks.
+    public static func revalidated(session: Session, localMachineID: String, desktopRoot: URL = ClaudeDesktopIndex.defaultRoot) -> ThreadLink {
+        var current = session
+        if current.provider == .claude {
+            current.desktopSessionID = current.machineID == localMachineID ? ClaudeDesktopIndex.load(root: desktopRoot)[current.nativeID] : nil
+        }
+        return ThreadLink(session: current, localMachineID: localMachineID)
     }
 }
 
