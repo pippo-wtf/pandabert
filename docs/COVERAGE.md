@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-PandaBert 0.4.2 is a local preview. These limits describe the implementation, not a promise of future delivery.
+PandaBert 0.4.3 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Collection behavior
 

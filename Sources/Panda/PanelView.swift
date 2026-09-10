@@ -9,6 +9,7 @@ let neutralSurface = Color(white: 0.97)
 
 struct PanelView: View {
     @ObservedObject var store: PandaStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var expanded = false
     @State private var selected: Session?
     @State private var settings = false
@@ -56,10 +57,14 @@ struct PanelView: View {
                         ForEach(store.pinned) { s in card(s, pinned: true) }
                     }
                     if !visibleAttention.isEmpty {
-                        sectionLabel("NEEDS YOU", count: visibleAttention.count)
-                        ForEach(Array(visibleAttention.prefix(showAll ? 250 : 8))) { s in card(s) }
-                        if visibleAttention.count > 8 && !showAll { Button("Show \(visibleAttention.count - 8) more") { showAll = true }.buttonStyle(.plain).foregroundStyle(lavender).padding(8) }
-                    } else if !store.loading {
+                        sectionLabel("NEEDS YOU", count: visibleAttention.count).transition(.opacity)
+                    }
+                    // Keep the ForEach mounted when its last card leaves, so that card can transition.
+                    ForEach(Array(visibleAttention.prefix(showAll ? 250 : 8))) { s in
+                        card(s).zIndex(1).transition(SeenDismissal.transition(reduceMotion: reduceMotion))
+                    }
+                    if visibleAttention.count > 8 && !showAll { Button("Show \(visibleAttention.count - 8) more") { showAll = true }.buttonStyle(.plain).foregroundStyle(lavender).padding(8) }
+                    if visibleAttention.isEmpty && !store.loading {
                         VStack(alignment: .leading, spacing: 8) {
                             Image(systemName: "sparkle").foregroundStyle(lavender).font(.system(size: 22))
                             Text(store.sessions.isEmpty ? "Your activity will appear here." : "Nothing needs your attention here.").font(.system(size: 13, weight: .medium))
@@ -194,7 +199,7 @@ struct DetailView: View {
                     store.preferences.projectAliases[s.projectKey] = alias.isEmpty ? nil : PandaCore.clipped(alias, 60); store.save()
                 }
                 Button(store.preferences.pins.contains(s.id) ? "Unpin" : "Pin task") { store.pin(s) }
-                if s.activity == .finished && store.preferences.reviewed[s.id] != s.completionKey { MarkSeenButton { store.reviewed(s); dismiss() } }
+                if s.activity == .finished && store.preferences.reviewed[s.id] != s.completionKey { MarkSeenButton { store.reviewed(s) } }
             }
             Divider()
             HStack {
@@ -205,6 +210,9 @@ struct DetailView: View {
             }
             Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; PandaBert does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
         }.padding(22).frame(width: 390).onAppear { waiting = store.preferences.waits[s.id] ?? ""; alias = store.preferences.projectName(s) }
+            .onChange(of: store.preferences.reviewed[s.id]) { seen in
+                if s.activity == .finished && seen == s.completionKey { dismiss() }
+            }
     }
 }
 

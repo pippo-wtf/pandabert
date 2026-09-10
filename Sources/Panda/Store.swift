@@ -75,7 +75,13 @@ final class PandaStore: ObservableObject {
         refresh()
     }
     func pin(_ session: Session) { preferences.togglePin(session.id); save() }
-    func reviewed(_ session: Session) { preferences.reviewed[session.id] = session.completionKey; save(); updateArrival(sessions) }
+    func reviewed(_ session: Session) {
+        withAnimation(SeenDismissal.animation(reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)) {
+            preferences.reviewed[session.id] = session.completionKey
+            save()
+            updateArrival(sessions)
+        }
+    }
     func openThread(_ session: Session) {
         let link = ThreadLink.revalidated(session: session, localMachineID: localMachineID)
         guard let url = link.url else { navigationError = link.explanation; return }

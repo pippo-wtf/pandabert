@@ -192,3 +192,12 @@ Validation:
 - Removed the white fill from Mark as seen, retaining the subtle outline, checkmark and label. An explicit capsule hit area keeps the empty interior clickable. The shared control updates both cards and Details; acknowledgement logic is unchanged.
 - Release build, packaging and local signature verification passed (`.build/package-seen-outline.txt`). No new tests were added for this style-only change.
 - Native visual inspection confirmed the button interior matches its card background and only the outline, checkmark and label remain.
+
+
+## Rubber-band card dismissal — 0.4.3
+
+- Acknowledging a finished response now springs its Needs you card out to the right: a brief pull left and compression, followed by a stretch, rightward exit and fade over 0.6 seconds. Remaining cards settle with a spring transaction. The same path serves Mark as seen and successful Open thread acknowledgement.
+- Kept the attention ForEach mounted for the last-card transition and raised the departing card above replacement content, so the empty state cannot cover it mid-exit. Details closes when its current response is acknowledged. Existing pin retention, unanswered-question and failed-open behavior is preserved. Reduce Motion uses a 0.14-second stationary fade.
+- All **55 regression tests passed**, including acknowledgement persistence, failure handling, delayed callback/new-response protection and pin retention. Output: `.build/test-results-0.4.3.txt`. Release build, packaging and local signature verification passed (`.build/package-results-0.4.3.txt`).
+- Native animation inspection used fictional local sample transcripts in an isolated data folder. The exact dismissal curve was slowed to three seconds only in ignored preview source for frame inspection; production remains 0.6 seconds. Mark as seen showed a card moving out to the right while the remaining card settled. A simulated successful Open thread from Details closed the sheet and dismissed the last card, leaving the empty state with both samples in the background. The opener was simulated to avoid routing invented IDs into the user's real apps. Existing real navigation was verified in 0.4.2.
+- Fixed an issue found during that inspection where the last departing card could be covered by the empty-state content. Rechecked the corrected layering and final empty state. No real task was acknowledged for this animation check, and no sample instrumentation or slowed timing is included in the packaged app.
