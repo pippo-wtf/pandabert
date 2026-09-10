@@ -26,7 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         store.onTopChanged = { [weak self] on in self?.panel.level = on ? .floating : .normal }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.button?.image = NSImage(systemSymbolName: "circle.circle.fill", accessibilityDescription: "Panda")
+        statusItem.button?.image = PandaBrand.menuBarImage
         let menu = NSMenu(); menu.addItem(withTitle: "Show Panda", action: #selector(showPanel), keyEquivalent: "")
         menu.addItem(withTitle: "Hide panel", action: #selector(hidePanel), keyEquivalent: "")
         menu.addItem(.separator()); menu.addItem(withTitle: "Quit Panda", action: #selector(quit), keyEquivalent: "q")

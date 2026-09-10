@@ -10,6 +10,9 @@ panda_app="$PWD/dist/Panda.app"
 mkdir -p "$panda_app/Contents/MacOS" "$panda_app/Contents/Resources"
 cp "$panda_bin/Panda" "$panda_app/Contents/MacOS/Panda"
 cp "$panda_bin/panda-agent" "$panda_app/Contents/Resources/panda-agent"
+ditto "$panda_bin/Panda_Panda.bundle" "$panda_app/Contents/Resources/Panda_Panda.bundle"
+swift scripts/generate-icons.swift "$PWD" "$PWD/.build/Panda.iconset"
+iconutil -c icns "$PWD/.build/Panda.iconset" -o "$panda_app/Contents/Resources/Panda.icns"
 cat > "$panda_app/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -18,9 +21,10 @@ cat > "$panda_app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Panda</string>
 <key>CFBundleDisplayName</key><string>Panda</string>
 <key>CFBundleExecutable</key><string>Panda</string>
+<key>CFBundleIconFile</key><string>Panda</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.2.3</string>
-<key>CFBundleVersion</key><string>11</string>
+<key>CFBundleShortVersionString</key><string>0.2.4</string>
+<key>CFBundleVersion</key><string>12</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
@@ -30,5 +34,5 @@ ln -sfn panda-agent "$panda_app/Contents/Resources/pulse-agent"
 codesign --force --sign - "$panda_app/Contents/Resources/panda-agent"
 codesign --force --sign - "$panda_app"
 codesign --verify --strict "$panda_app"
-ditto -c -k --keepParent "$panda_app" "$PWD/dist/Panda-0.2.3-macos-arm64.zip"
+ditto -c -k --keepParent "$panda_app" "$PWD/dist/Panda-0.2.4-macos-arm64.zip"
 echo "Packaged: $panda_app"

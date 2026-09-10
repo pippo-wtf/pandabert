@@ -20,7 +20,7 @@ struct PanelView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 7) {
-                Image(systemName: "circle.circle.fill").font(.system(size: 21, weight: .bold))
+                PandaMark()
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Panda").font(.system(size: 14, weight: .semibold))
                     Text("Keeps you on track").font(.system(size: 8)).foregroundStyle(.white.opacity(0.72))

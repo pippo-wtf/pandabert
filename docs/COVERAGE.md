@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-Panda 0.2.3 is a local preview. These limits describe the implementation, not a promise of future delivery.
+Panda 0.2.4 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Collection behavior
 

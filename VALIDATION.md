@@ -123,3 +123,12 @@ Validation:
 - Release packaging and local signature verification passed. The packaged 0.2.3 collector also rejected corrupt settings before creating a collector identity, with zero stdout.
 - Slow-network behavior was exercised using controlled blocking adapters, not by disrupting live SSH or GitHub connections. Multi-machine/four-account acceptance remains separate from these regressions.
 - Live native smoke check: Panda 0.2.3 completed collection and displayed its attention/background tasks, both local sources and the enabled Claude conversation link. The existing quiet panel design was preserved.
+
+
+## Panda logo — 0.2.4
+
+- Replaced the original circular symbol with a panda face: ears, eye patches and a small nose with a rounded drip offset to the viewer's left. The final generated master has real alpha transparency; the discarded checkerboard drafts are not shipped.
+- The compact header uses a white 23-point template mark. The menu bar uses the same adaptive template at 22 points. Packaging now includes the SwiftPM artwork resource bundle and a macOS app icon in all standard sizes, rendered from the same master on a white rounded tile. The README and all four sample screenshots were refreshed.
+- All 42 tests passed after the resource integration. Release compilation, icon conversion and local signature verification passed. macOS icon conversion required running outside the restricted sandbox; the same valid icon set converted successfully there.
+- The native sample panel was inspected at its existing 364-point width: the new mark fits alongside the full Panda name and subline. Screenshot tasks are fictional. Observation, navigation, pin and glow logic are unchanged in this release.
+- Standalone resource check: temporarily removed the SwiftPM build-resource fallback, launched the packaged app and visually confirmed the logo rendered from its bundled resources. Restored the build resource afterward.
