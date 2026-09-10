@@ -32,8 +32,9 @@ struct PanelView: View {
                         if let s = store.sessions.first(where: { $0.projectKey == key }) { Button(store.preferences.projectName(s)) { project = key } }
                     }
                 } label: {
-                    HStack(spacing: 4) { Text(project.isEmpty ? "All projects" : store.sessions.first(where: { $0.projectKey == project }).map { store.preferences.projectName($0) } ?? "Project").lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 8)) }.font(.system(size: 10))
-                }.menuStyle(.borderlessButton).environment(\.colorScheme, .dark).fixedSize().frame(maxWidth: 105)
+                    Text(project.isEmpty ? "All projects" : store.sessions.first(where: { $0.projectKey == project }).map { store.preferences.projectName($0) } ?? "Project").lineLimit(1).font(.system(size: 10)).padding(.trailing, 12)
+                }.menuStyle(.borderlessButton).menuIndicator(.hidden).environment(\.colorScheme, .dark).fixedSize().frame(maxWidth: 105)
+                    .overlay(alignment: .trailing) { Image(systemName: "chevron.down").font(.system(size: 8)).allowsHitTesting(false) }
                 Text("\(needsCount) need you").font(.system(size: 10, weight: .semibold)).lineLimit(1).fixedSize(horizontal: true, vertical: false).foregroundStyle(.white).padding(.horizontal, 9).padding(.vertical, 7).background(lavender, in: Capsule())
             }.foregroundStyle(.white).padding(.horizontal, 13).frame(height: 43).background(ink, in: Capsule()).padding(16)
             HStack(alignment: .top) {

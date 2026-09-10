@@ -151,3 +151,9 @@ Validation:
 - Unlinked terminal tasks show a quiet, noninteractive **Terminal session** label in cards and Details. A valid local desktop mapping still enables navigation. Existing unsupported desktop/unknown and remote routing behavior remains intact.
 - All **45 tests passed**, including terminal records with bridge IDs, absent desktop mappings, inherited fork provenance, and an explicit origin change. Release packaging and local signature verification passed. Output: `.build/test-results-0.3.1.txt` and `.build/package-results-0.3.1.txt`.
 - A real local collector snapshot identified six explicit terminal sessions with no desktop mappings. The running packaged app displayed the information label for the recent Claude CLI session; native accessibility inspection confirmed it was text rather than a disabled button, and visual inspection confirmed the label and explanation in Details. No prompt was submitted and no session was resumed/imported. Live user content was not added to public screenshots or test fixtures.
+
+
+## Header arrow cleanup — 0.3.1 follow-up
+
+- Removed the leading project-selector arrow. The native menu indicator is hidden; a single trailing chevron is drawn outside the menu label so macOS cannot relocate it to the leading icon slot.
+- Release build, packaging and local signature verification passed. Inspected the running app visually: one arrow appears to the right of All projects, none to its left. Opened and dismissed the project dropdown successfully. No new tests were added for this presentation-only change.
