@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-public let pulseVersion = "0.1.4"
+public let pulseVersion = "0.1.5"
 public let pulseProtocolVersion = 1
 
 public enum Provider: String, Codable, CaseIterable { case claude, codex

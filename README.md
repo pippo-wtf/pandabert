@@ -4,7 +4,7 @@
 
 Pulse is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.1.4 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.1.5 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="Pulse attention panel with a pinned working task and a task that needs an answer" width="364">
@@ -21,6 +21,7 @@ Pulse gives that scattered work a small, persistent home. Its purpose is to redu
 ## What you can do
 
 - **See what needs you.** Observed questions and newly completed turns surface in an attention list. Acknowledging a result clears that turn; a later completion can surface again.
+- **Notice the newest arrival.** The latest task needing attention gets a soft lavender edge glow for 30 seconds, with a slow breathing cycle and a gentle fade. Regular refreshes do not restart it.
 - **Keep important work pinned.** Pins stay above the attention list and survive relaunches.
 - **Glance at work in progress.** Expand the background section for active, waiting, reviewed and uncertain tasks.
 - **Group by project.** Repository identities bring related conversations together. Filter by project and give it a friendlier display name.
@@ -81,7 +82,7 @@ The app is locally ad-hoc signed; this preview has no notarized installer or aut
 
 ## Current scope
 
-Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **21 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
+Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **28 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
 
 Some important boundaries:
 

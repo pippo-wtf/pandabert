@@ -12,6 +12,8 @@ final class PulseStore: ObservableObject {
     @Published var loading = true
     @Published var localMachineID = ""
     @Published var navigationError: String?
+    @Published var latestArrival: AttentionArrival?
+    private var arrivalTracker = AttentionArrivalTracker()
     let root = PulsePaths.data
     private let queue = DispatchQueue(label: "pulse.collector", qos: .utility)
     private var collector: Collector?
@@ -49,7 +51,7 @@ final class PulseStore: ObservableObject {
         onTopChanged?(preferences.alwaysOnTop)
     }
     func pin(_ session: Session) { preferences.togglePin(session.id); save() }
-    func reviewed(_ session: Session) { preferences.reviewed[session.id] = session.completionKey; save() }
+    func reviewed(_ session: Session) { preferences.reviewed[session.id] = session.completionKey; save(); updateArrival(sessions) }
     func openThread(_ session: Session) {
         let link = ThreadLink.revalidated(session: session, localMachineID: localMachineID)
         guard let url = link.url else { navigationError = link.explanation; return }
@@ -64,6 +66,18 @@ final class PulseStore: ObservableObject {
     var attention: [Session] { sessions.filter { preferences.needsAttention($0) && !preferences.pins.contains($0.id) } }
     var pinned: [Session] { preferences.pins.compactMap { id in sessions.first { $0.id == id } } }
     var background: [Session] { sessions.filter { !preferences.needsAttention($0) && !preferences.pins.contains($0.id) } }
+    private func updateArrival(_ current: [Session]) {
+        if let arrival = arrivalTracker.observe(current, preferences: preferences) {
+            latestArrival = arrival
+            DispatchQueue.main.asyncAfter(deadline: .now() + AttentionArrival.duration) { [weak self] in
+                if self?.latestArrival == arrival { self?.latestArrival = nil }
+            }
+        }
+        if let arrival = latestArrival,
+           !current.contains(where: { $0.id == arrival.sessionID && preferences.needsAttention($0) }) {
+            latestArrival = nil
+        }
+    }
     func refresh(force: Bool = false) {
         guard !busy else { return }; busy = true
         let prefs = preferences
@@ -107,7 +121,7 @@ final class PulseStore: ObservableObject {
                     s.sourceOnline = false; s.reason = "Pinned task outside current observation coverage"; all.append(s)
                 }
                 let final = all; let finalStatus = status; let finalErrors = errors
-                DispatchQueue.main.async { self.sessions = final; self.coverage = finalStatus; self.issues = finalErrors + (self.preferenceError.map { [$0] } ?? []); self.refreshed = Date(); self.busy = false; self.loading = false }
+                DispatchQueue.main.async { self.updateArrival(final); self.sessions = final; self.coverage = finalStatus; self.issues = finalErrors + (self.preferenceError.map { [$0] } ?? []); self.refreshed = Date(); self.busy = false; self.loading = false }
             } catch {
                 DispatchQueue.main.async { self.issues = [error.localizedDescription]; self.busy = false; self.loading = false }
             }

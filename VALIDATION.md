@@ -61,3 +61,12 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Release build and local signature verification passed; the embedded collector reports version 0.1.4.
 - Account authorization remains owned by Claude. Local identity metadata does not independently establish access for a different signed-in account.
 - Live native panel verification: the previously failing bridge-only task now has a disabled Open thread button and an unavailable-mapping explanation. The neutral cards and subtle status dots are preserved. No message was sent or task marked reviewed.
+
+
+## Latest attention glow — 0.1.5
+
+- The newest observed attention event receives a subtle lavender edge and halo for 30 seconds. The eight-second breathing cycle eases in over three seconds and fades out over the final five seconds. Neutral cards, status dots and pin outlines are preserved.
+- Repeated polling, unchanged GitHub check timestamps, reconnects and startup backlog do not replay the same notification. Pins remain eligible; only one newest arrival glows. Reviewing or resolving the active attention item clears it.
+- Reduce Motion uses a steady highlight with the same entry/exit fade, without the breathing cycle. The overlay does not intercept clicks or enter the accessibility tree; its timeline is removed after expiration.
+- All **28 tests passed**, including seven new notification-detection regression tests. Output: `.build/test-results-0.1.5.txt`.
+- Release build and local signature verification passed. Native UI inspection used an isolated sample-data copy with the production views and arrival logic: the target card glowed, the pinned card retained its usual outline, and the glow disappeared after the time window. This is fixture-driven UI verification, not a newly recorded live-provider notification test. Reduce Motion behavior was implemented but not toggled in the user's system settings during verification.

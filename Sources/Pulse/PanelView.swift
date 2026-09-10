@@ -115,6 +115,11 @@ struct PanelView: View {
             }
         }.foregroundStyle(ink).padding(14).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
             .overlay(RoundedRectangle(cornerRadius: 17).stroke(pinned ? lavender.opacity(0.35) : .clear, lineWidth: 1))
+            .overlay {
+                if let arrival = store.latestArrival, arrival.sessionID == s.id {
+                    AttentionGlow(arrival: arrival)
+                }
+            }
     }
 }
 

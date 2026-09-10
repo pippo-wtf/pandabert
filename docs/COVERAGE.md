@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-Pulse 0.1.4 is a local preview. These limits describe the implementation, not a promise of future delivery.
+Pulse 0.1.5 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Known coverage limits
 
@@ -16,6 +16,6 @@ Pulse 0.1.4 is a local preview. These limits describe the implementation, not a 
 
 ## Validation status
 
-The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 21 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
+The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 28 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
 
 [Back to the overview](../README.md)
