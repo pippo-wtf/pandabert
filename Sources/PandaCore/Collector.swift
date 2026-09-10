@@ -36,7 +36,8 @@ public final class Collector {
                 let key = profile.id + url.path
                 var session: Session?
                 if let cached = cache[key], cached.0 == modified, cached.1 == size { session = cached.2 }
-                else if let records = try? Self.readRecords(url) {
+                else if let transcript = try? Self.readTranscript(url) {
+                    let records = transcript.head + transcript.tail
                     let fileID = url.deletingPathExtension().lastPathComponent
                     let recordedID = records.lazy.compactMap { o -> String? in
                         if profile.provider == .codex, o["type"] as? String == "session_meta" { return (o["payload"] as? [String: Any])?["id"] as? String }
@@ -45,7 +46,9 @@ public final class Collector {
                     // Forks copy parent history; the UUID filename identifies the current Claude session.
                     let native = profile.provider == .claude && UUID(uuidString: fileID) != nil ? fileID : recordedID
                     var reducer = SessionReducer(Session(nativeID: native, profile: profile, machineID: machineID, machine: machine))
-                    for record in records { reducer.apply(record) }
+                    for record in transcript.head { reducer.apply(record) }
+                    if transcript.hasGap { reducer.transcriptGap() }
+                    for record in transcript.tail { reducer.apply(record) }
                     var s = reducer.session; s.sourcePath = url.path
                     if s.repository.isEmpty, !s.cwd.isEmpty {
                         if let cached = repos[s.cwd] { s.repository = cached }
@@ -76,6 +79,15 @@ public final class Collector {
     }
     // Parse complete JSONL records only. Large transcripts retain metadata plus a bounded recent tail.
     public static func readRecords(_ url: URL, limit: Int = 2 * 1024 * 1024) throws -> [[String: Any]] {
+        let transcript = try readTranscript(url, limit: limit)
+        return transcript.head + transcript.tail
+    }
+    public struct TranscriptRecords {
+        public let head: [[String: Any]]
+        public let tail: [[String: Any]]
+        public let hasGap: Bool
+    }
+    public static func readTranscript(_ url: URL, limit: Int = 2 * 1024 * 1024) throws -> TranscriptRecords {
         let handle = try FileHandle(forReadingFrom: url); defer { try? handle.close() }
         let size = try handle.seekToEnd(); try handle.seek(toOffset: 0)
         var chunks: [Data] = []
@@ -85,14 +97,16 @@ public final class Collector {
             let tail = try handle.read(upToCount: limit) ?? Data()
             if let first = tail.firstIndex(of: 10) { chunks.append(Data(tail.suffix(from: tail.index(after: first)))) }
         } else { chunks.append(try handle.read(upToCount: limit) ?? Data()) }
-        var result: [[String: Any]] = []
+        var parsed: [[[String: Any]]] = []
         for chunk in chunks {
+            var result: [[String: Any]] = []
             let lines = chunk.split(separator: 10, omittingEmptySubsequences: false)
             for line in lines.dropLast() {
                 if let o = (try? JSONSerialization.jsonObject(with: Data(line))) as? [String: Any] { result.append(o) }
             }
+            parsed.append(result)
         }
-        return result
+        return TranscriptRecords(head: parsed.first ?? [], tail: parsed.count > 1 ? parsed[1] : [], hasGap: size > limit)
     }
     public static func projectKey(repository: String, cwd: String, machine: String) -> String {
         var r = repository.trimmingCharacters(in: .whitespacesAndNewlines)

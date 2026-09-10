@@ -16,6 +16,13 @@ public struct AttentionArrivalTracker {
     private var observedPR: [String: String] = [:]
     public init() {}
 
+    /// A source can arrive later than the first local scan; seed its existing tasks without a backlog glow.
+    public mutating func establishBaseline(_ sessions: [Session], preferences: Preferences, now: Date = Date()) {
+        let wasPrimed = primed; primed = false
+        _ = observe(sessions, preferences: preferences, now: now)
+        primed = wasPrimed
+    }
+
     public mutating func observe(_ sessions: [Session], preferences: Preferences, now: Date = Date()) -> AttentionArrival? {
         var newest: Session?
         for session in sessions where session.sourceOnline {

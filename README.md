@@ -6,7 +6,7 @@ Panda is a small native macOS panel for people working across Claude Code and Co
 
 Previously called Pulse. Existing settings and pins carry over.
 
-**Current version: 0.2.2 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.2.3 · Public preview · Apple Silicon · macOS 13+**
 
 <p align="center">
   <img src="docs/screenshots/attention.jpg" alt="Panda attention panel with a pinned working task and a task that needs an answer" width="364">

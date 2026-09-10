@@ -9,16 +9,18 @@ do {
         Usage: panda-agent snapshot | watch | --version
         snapshot   Emit one bounded JSON snapshot of the last 14 days.
         watch      Emit a JSON snapshot every five seconds until interrupted.
-        Reads profile roots from Panda preferences, or ~/.claude and ~/.codex.
+        Reads saved profile roots; defaults to ~/.claude and ~/.codex only when preferences are absent.
+        Unreadable or invalid preferences stop collection with an error and no snapshot.
         PANDA_HOME overrides Panda's own state folder (PULSE_HOME remains supported). No provider settings are changed.
         """)
     } else if args == ["--version"] { print(pandaVersion) }
     else if args == ["snapshot"] || args == ["watch"] {
         let root = PandaPaths.data
-        let prefs = (try? Data(contentsOf: root.appendingPathComponent("preferences.json"))).flatMap { try? JSONDecoder().decode(Preferences.self, from: $0) } ?? Preferences()
-        let collector = try Collector(root: root)
+        var collector: Collector?
         repeat {
-            let snapshot = collector.snapshot(profiles: prefs.profiles)
+            let prefs = try PreferencesFile.load(root: root) ?? Preferences()
+            if collector == nil { collector = try Collector(root: root) }
+            let snapshot = collector!.snapshot(profiles: prefs.profiles)
             let data = try JSONEncoder().encode(snapshot)
             FileHandle.standardOutput.write(data); FileHandle.standardOutput.write(Data([10]))
             if args == ["snapshot"] { break }

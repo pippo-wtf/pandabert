@@ -9,6 +9,15 @@ final class AttentionArrivalTests: XCTestCase {
         s.activity = activity; s.turnID = "turn-1"; s.lastActivityEvent = now.addingTimeInterval(offset); s.lastEvent = s.lastActivityEvent
         return s
     }
+    func testLaterSourceBaselineDoesNotGlowButItsNextUpdateDoes() {
+        var tracker = AttentionArrivalTracker()
+        _ = tracker.observe([], preferences: prefs, now: now)
+        var s = task(activity: .question)
+        tracker.establishBaseline([s], preferences: prefs, now: now)
+        XCTAssertNil(tracker.observe([s], preferences: prefs, now: now))
+        s.turnID = "next-turn"; s.lastActivityEvent = now.addingTimeInterval(1)
+        XCTAssertNotNil(tracker.observe([s], preferences: prefs, now: now.addingTimeInterval(2)))
+    }
     func testStartupBacklogAndRepeatedPollsDoNotGlow() {
         var tracker = AttentionArrivalTracker(); var s = task(activity: .question)
         XCTAssertNil(tracker.observe([s], preferences: prefs, now: now))

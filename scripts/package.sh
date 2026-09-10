@@ -19,8 +19,8 @@ cat > "$panda_app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleDisplayName</key><string>Panda</string>
 <key>CFBundleExecutable</key><string>Panda</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.2.2</string>
-<key>CFBundleVersion</key><string>10</string>
+<key>CFBundleShortVersionString</key><string>0.2.3</string>
+<key>CFBundleVersion</key><string>11</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
@@ -30,5 +30,5 @@ ln -sfn panda-agent "$panda_app/Contents/Resources/pulse-agent"
 codesign --force --sign - "$panda_app/Contents/Resources/panda-agent"
 codesign --force --sign - "$panda_app"
 codesign --verify --strict "$panda_app"
-ditto -c -k --keepParent "$panda_app" "$PWD/dist/Panda-0.2.2-macos-arm64.zip"
+ditto -c -k --keepParent "$panda_app" "$PWD/dist/Panda-0.2.3-macos-arm64.zip"
 echo "Packaged: $panda_app"

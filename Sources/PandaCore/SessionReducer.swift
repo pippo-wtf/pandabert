@@ -3,6 +3,12 @@ import Foundation
 public struct SessionReducer {
     public private(set) var session: Session
     public init(_ session: Session) { self.session = session }
+    /// Metadata may survive a skipped span; lifecycle and pending questions cannot.
+    public mutating func transcriptGap() {
+        session.activity = .unknown; session.turnID = ""; session.pendingCallID = ""
+        session.lastActivityEvent = .distantPast; session.lastEvent = .distantPast; session.excerpt = ""
+        session.reason = "Recent log context is incomplete"
+    }
     private static let iso = ISO8601DateFormatter()
     private static let fractional: ISO8601DateFormatter = { let f = ISO8601DateFormatter(); f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]; return f }()
     public static func date(_ value: Any?) -> Date? {

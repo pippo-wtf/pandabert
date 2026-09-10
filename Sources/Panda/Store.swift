@@ -14,27 +14,23 @@ final class PandaStore: ObservableObject {
     @Published var navigationError: String?
     @Published var latestArrival: AttentionArrival?
     private var arrivalTracker = AttentionArrivalTracker()
-    let root = PandaPaths.data
-    private let queue = DispatchQueue(label: "panda.collector", qos: .utility)
-    private var collector: Collector?
-    private var remoteCache: [String: Snapshot] = [:]
-    private var remoteErrors: [String: String] = [:]
-    private var githubCache: [String: PullRequest] = [:]
-    private var lastRemote = Date.distantPast
-    private var lastGitHub = Date.distantPast
+    let root: URL
+    private var pipeline: ObservationPipeline?
     private var timer: Timer?
-    private var busy = false
     private var pinnedCache: [Session] = []
     private var preferenceError: String?
     var onTopChanged: ((Bool) -> Void)?
-    init() {
+    init(root: URL = PandaPaths.data) {
+        self.root = root
         let path = root.appendingPathComponent("preferences.json")
-        if FileManager.default.fileExists(atPath: path.path) {
-            do { preferences = try JSONDecoder().decode(Preferences.self, from: Data(contentsOf: path)) }
-            catch { preferenceError = "Saved preferences could not be read. Existing file was preserved."; issues = [preferenceError!] }
-        } else {
-            do { try PandaPaths.save(preferences, to: path) }
-            catch { preferenceError = "Could not save initial preferences: \(error.localizedDescription)" }
+        do {
+            if let saved = try PreferencesFile.load(root: root) { preferences = saved }
+            else { try PandaPaths.save(preferences, to: path) }
+        } catch {
+            preferenceError = error.localizedDescription; issues = [error.localizedDescription]
+            preferences.profiles = []; preferences.remotes = []; preferences.githubEnabled = false
+            loading = false
+            return
         }
         pinnedCache = (try? Data(contentsOf: root.appendingPathComponent("pinned-sessions.json"))).flatMap { try? JSONDecoder().decode([Session].self, from: $0) } ?? []
         refresh()
@@ -49,6 +45,7 @@ final class PandaStore: ObservableObject {
         }
         catch { issues.append("Could not save preferences: \(error.localizedDescription)") }
         onTopChanged?(preferences.alwaysOnTop)
+        refresh()
     }
     func pin(_ session: Session) { preferences.togglePin(session.id); save() }
     func reviewed(_ session: Session) { preferences.reviewed[session.id] = session.completionKey; save(); updateArrival(sessions) }
@@ -79,52 +76,18 @@ final class PandaStore: ObservableObject {
         }
     }
     func refresh(force: Bool = false) {
-        guard !busy else { return }; busy = true
-        let prefs = preferences
-        let retainedPins = pinnedCache
-        queue.async { [self] in
-            var errors: [String] = []
-            do {
-                if collector == nil { collector = try Collector(root: root) }
-                let local = collector!.snapshot(profiles: prefs.profiles)
-                DispatchQueue.main.async { self.localMachineID = local.machineID; if self.loading { self.sessions = local.sessions; self.coverage = local.coverage; self.loading = false } }
-                var all = local.sessions; var status = local.coverage
-                if force || Date().timeIntervalSince(lastRemote) >= 30 {
-                    for remote in prefs.remotes {
-                        do { remoteCache[remote.id] = try RemoteReader.snapshot(remote); remoteErrors[remote.id] = nil }
-                        catch {
-                            remoteErrors[remote.id] = "\(remote.label): connection unavailable"
-                            if var old = remoteCache[remote.id] { old.sessions = old.sessions.map { s in var s = s; s.sourceOnline = false; return s }; remoteCache[remote.id] = old }
-                        }
-                    }
-                    lastRemote = Date()
-                }
-                for remote in prefs.remotes {
-                    if let error = remoteErrors[remote.id] { errors.append(error) }
-                    if let snapshot = remoteCache[remote.id] {
-                        all += snapshot.sessions.map { s in var s = s; s.machine = remote.label; if Date().timeIntervalSince(snapshot.generatedAt) > 90 { s.sourceOnline = false }; return s }
-                        status += snapshot.coverage.map { c in var c = c; c.profile = remote.label + " · " + c.profile; if remoteErrors[remote.id] != nil || Date().timeIntervalSince(snapshot.generatedAt) > 90 { c.available = false; c.message = "Machine unavailable · cached sessions" }; return c }
-                    }
-                }
-                if prefs.githubEnabled && (force || Date().timeIntervalSince(lastGitHub) >= 60) {
-                    var urls = Set<String>()
-                    for s in all where s.pullRequest != nil {
-                        let pr = s.pullRequest!
-                        if urls.count >= 12 { break }
-                        if urls.insert(pr.url).inserted { githubCache[pr.url] = GitHub.refresh(pr) }
-                    }
-                    lastGitHub = Date()
-                }
-                all = all.map { s in var s = s; if prefs.githubEnabled, let url = s.pullRequest?.url, let pr = githubCache[url] { s.pullRequest = pr }; return s }
-                var ids = Set<String>(); all = all.filter { ids.insert($0.id).inserted }.sorted { $0.lastEvent > $1.lastEvent }
-                for var s in retainedPins where !ids.contains(s.id) && prefs.pins.contains(s.id) {
-                    s.sourceOnline = false; s.reason = "Pinned task outside current observation coverage"; all.append(s)
-                }
-                let final = all; let finalStatus = status; let finalErrors = errors
-                DispatchQueue.main.async { self.updateArrival(final); self.sessions = final; self.coverage = finalStatus; self.issues = finalErrors + (self.preferenceError.map { [$0] } ?? []); self.refreshed = Date(); self.busy = false; self.loading = false }
-            } catch {
-                DispatchQueue.main.async { self.issues = [error.localizedDescription]; self.busy = false; self.loading = false }
+        guard preferenceError == nil else { return }
+        if pipeline == nil {
+            pipeline = ObservationPipeline(root: root) { [weak self] update in
+                guard let self else { return }
+                self.localMachineID = update.localMachineID
+                self.arrivalTracker.establishBaseline(update.baselineSessions, preferences: self.preferences)
+                self.updateArrival(update.sessions)
+                self.sessions = update.sessions; self.coverage = update.coverage; self.issues = update.issues
+                self.refreshed = update.refreshed
+                if update.refreshed != nil || !update.issues.isEmpty { self.loading = false }
             }
         }
+        pipeline?.refresh(preferences: preferences, pins: pinnedCache, force: force)
     }
 }

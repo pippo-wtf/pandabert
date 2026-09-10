@@ -106,3 +106,20 @@ The app currently runs from `dist/Pulse.app`. No provider hook, daemon, approval
 - Live collector verification resolved the previously disabled conversation to its exact desktop ID. It also returned separate parent and fork records with the correct IDs, with no inherited parent bridge on the fork.
 - Live native acceptance: selected a different existing Claude conversation, clicked the previously disabled task's Open thread button in Panda, then verified Claude changed to the target's exact desktop route and displayed its matching title. No prompt was submitted or task marked reviewed. The standard Claude bundle was running with the Parall profile on this machine.
 - Automatic switching between separately signed-in app instances, remote navigation and four-account multi-machine acceptance remain unverified. Metadata establishes identity, not authorization in a different active account. The earlier unrelated code-review findings remain open.
+
+
+## Code-review fixes — 0.2.3
+
+All three findings from the 0.1.6 review are addressed:
+
+- **Unreadable preferences:** the app and CLI share strict preference loading. Only an absent file permits first-launch defaults. Invalid JSON, incompatible data, unreadable files and dangling links stop observation. The app preserves the file, shows an error and prevents refresh/save from starting collection. The CLI exits nonzero with no snapshot; watch mode reloads preferences before every emission.
+- **Truncated transcript state:** the collector explicitly separates retained metadata from the recent tail. At a skipped span it clears inherited lifecycle state, pending questions and obsolete turn IDs. A completion in the tail can establish the current turn; without sufficient evidence, the state remains uncertain instead of retaining an older finished turn. The original two failing review reproductions now pass against the collector and their full-log controls.
+- **Slow external checks:** local, SSH and GitHub observation use independent single-flight workers. Local results publish after every scan, regardless of external work. External results merge into the latest local snapshot and publish individually; removed remote sources cannot reappear from in-flight results. Initial source snapshots seed the glow baseline without replaying a backlog.
+
+Validation:
+
+- **42 tests passed**, including the original review reproductions, app-level invalid-preferences test, settings-file edge cases, deliberately blocked SSH/GitHub workers with a subsequent local status change, late result merging, removed-remote handling and deferred-source glow baselines. Output: `.build/test-results-0.2.3.txt`.
+- Real CLI subprocess checks in temporary state folders: valid empty observation scope emitted zero sessions; malformed/incompatible/unreadable settings exited 1 with empty stdout and preserved settings; a running watcher stopped without another snapshot after settings became invalid. No live provider preferences were edited.
+- Release packaging and local signature verification passed. The packaged 0.2.3 collector also rejected corrupt settings before creating a collector identity, with zero stdout.
+- Slow-network behavior was exercised using controlled blocking adapters, not by disrupting live SSH or GitHub connections. Multi-machine/four-account acceptance remains separate from these regressions.
+- Live native smoke check: Panda 0.2.3 completed collection and displayed its attention/background tasks, both local sources and the enabled Claude conversation link. The existing quiet panel design was preserved.

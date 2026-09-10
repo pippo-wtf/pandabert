@@ -8,5 +8,6 @@ let package = Package(name: "Panda", platforms: [.macOS(.v13)], products: [
     .target(name: "PandaCore"),
     .executableTarget(name: "Panda", dependencies: ["PandaCore"]),
     .executableTarget(name: "PandaAgent", dependencies: ["PandaCore"]),
-    .testTarget(name: "PandaCoreTests", dependencies: ["PandaCore"])
+    .testTarget(name: "PandaCoreTests", dependencies: ["PandaCore"]),
+    .testTarget(name: "PandaAppTests", dependencies: ["Panda"])
 ])
