@@ -75,4 +75,49 @@ final class ThreadSeenTests: XCTestCase {
         try XCTUnwrap(completion)(.success(())); drainCallback()
         XCTAssertTrue(store.preferences.needsAttention(finished)); XCTAssertNil(store.preferences.reviewed[finished.id])
     }
+    func testUnpinKeepsSeenCardInPlaceUntilExplicitAcknowledgement() throws {
+        let store = try makeStore { _, _, _ in }
+        let first = task(store), second = task(store)
+        store.sessions = [first, second]
+        // Seed both cached cards together: this isolated store has no transcript sources.
+        store.preferences.pins = [first.id, second.id]; store.save()
+        store.reviewed(first)
+        XCTAssertEqual(store.keptCards.map(\.id), [first.id, second.id])
+        XCTAssertEqual(store.cardPresses[first.id], 1)
+        store.pin(first)
+        XCTAssertEqual(store.preferences.pins, [second.id])
+        XCTAssertEqual(store.keptCards.map(\.id), [first.id, second.id])
+        XCTAssertFalse(store.background.contains { $0.id == first.id })
+        XCTAssertEqual(try PreferencesFile.load(root: store.root)?.keptCardIDs, [first.id, second.id])
+        store.reviewed(first)
+        XCTAssertEqual(store.keptCards.map(\.id), [second.id])
+        XCTAssertEqual(store.preferences.reviewed[first.id], first.completionKey)
+        XCTAssertEqual(store.preferences.pins, [second.id])
+    }
+
+    func testOpenOfAlreadySeenUnpinnedCardReleasesOnlyOnSuccess() throws {
+        var completion: ((Result<Void, Error>) -> Void)?
+        let store = try makeStore { _, _, callback in completion = callback }
+        let s = task(store); store.sessions = [s]
+        store.pin(s); store.reviewed(s); store.pin(s)
+        store.openThread(s)
+        try XCTUnwrap(completion)(.failure(PandaError.message("Unavailable"))); drainCallback()
+        XCTAssertTrue(store.preferences.keptCardIDs.contains(s.id))
+        store.openThread(s)
+        try XCTUnwrap(completion)(.success(())); drainCallback()
+        XCTAssertFalse(store.preferences.keptCardIDs.contains(s.id))
+        XCTAssertEqual(store.preferences.reviewed[s.id], s.completionKey)
+    }
+
+    func testExistingPreferencesRetainPinsWithoutNewOrderField() throws {
+        var preferences = Preferences(); preferences.pins = ["existing"]
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(preferences)) as? [String: Any])
+        json.removeValue(forKey: "keptCardOrder")
+        var decoded = try JSONDecoder().decode(Preferences.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertEqual(decoded.keptCardIDs, ["existing"])
+        decoded.togglePin("existing")
+        XCTAssertTrue(decoded.pins.isEmpty)
+        XCTAssertEqual(decoded.keptCardIDs, ["existing"])
+    }
+
 }

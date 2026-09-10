@@ -16,6 +16,7 @@ struct PanelView: View {
     @State private var project = ""
     @State private var showAll = false
     private var visibleAttention: [Session] { store.attention.filter { project.isEmpty || $0.projectKey == project } }
+    private var visibleCards: [Session] { store.keptCards + Array(visibleAttention.prefix(showAll ? 250 : 8)) }
     private var working: Int { store.sessions.filter { $0.displayActivity() == .working }.count }
     private var needsCount: Int { store.sessions.filter { store.preferences.needsAttention($0) }.count }
     var body: some View {
@@ -52,16 +53,19 @@ struct PanelView: View {
                     if store.needsSetup {
                         Button("Set up PandaBert") { store.showSetup = true }.buttonStyle(.borderedProminent).tint(lavender)
                     }
-                    if !store.pinned.isEmpty {
-                        sectionLabel("PINNED", count: store.pinned.count)
-                        ForEach(store.pinned) { s in card(s, pinned: true) }
-                    }
-                    if !visibleAttention.isEmpty {
-                        sectionLabel("NEEDS YOU", count: visibleAttention.count).transition(.opacity)
-                    }
-                    // Keep the ForEach mounted when its last card leaves, so that card can transition.
-                    ForEach(Array(visibleAttention.prefix(showAll ? 250 : 8))) { s in
-                        card(s).zIndex(1).transition(SeenDismissal.transition(reduceMotion: reduceMotion))
+                    // One stable identity across pin/unpin changes prevents a removal transition.
+                    ForEach(visibleCards) { s in
+                        VStack(spacing: 10) {
+                            if s.id == store.keptCards.first?.id {
+                                sectionLabel(store.keptCards.count == store.pinned.count ? "PINNED" : "KEPT IN SIGHT", count: store.keptCards.count)
+                            }
+                            if s.id == visibleAttention.first?.id {
+                                sectionLabel("NEEDS YOU", count: visibleAttention.count)
+                            }
+                            card(s, pinned: store.preferences.pins.contains(s.id))
+                                .modifier(CardPress(progress: Double(store.cardPresses[s.id, default: 0]), reduceMotion: reduceMotion))
+                                .animation(.easeInOut(duration: 0.22), value: store.cardPresses[s.id, default: 0])
+                        }.zIndex(1).transition(SeenDismissal.transition(reduceMotion: reduceMotion))
                     }
                     if visibleAttention.count > 8 && !showAll { Button("Show \(visibleAttention.count - 8) more") { showAll = true }.buttonStyle(.plain).foregroundStyle(lavender).padding(8) }
                     if visibleAttention.isEmpty && !store.loading {
@@ -124,7 +128,7 @@ struct PanelView: View {
                     OpenThreadButton(store: store, session: s)
                     Button("Details") { selected = s }.font(.system(size: 10)).buttonStyle(.plain).foregroundStyle(.secondary)
                     Spacer()
-                    if attention && s.activity == .finished && store.preferences.reviewed[s.id] != s.completionKey { MarkSeenButton { store.reviewed(s) } }
+                    if s.activity == .finished && ((attention && store.preferences.reviewed[s.id] != s.completionKey) || (!pinned && store.preferences.keptCardIDs.contains(s.id))) { MarkSeenButton { store.reviewed(s) } }
                 }.padding(.top, 2)
             }
         }.foregroundStyle(ink).padding(14).background(neutralSurface, in: RoundedRectangle(cornerRadius: 17))
@@ -200,7 +204,7 @@ struct DetailView: View {
                     store.preferences.projectAliases[s.projectKey] = alias.isEmpty ? nil : PandaCore.clipped(alias, 60); store.save()
                 }
                 Button(store.preferences.pins.contains(s.id) ? "Unpin" : "Pin task") { store.pin(s) }
-                if s.activity == .finished && store.preferences.reviewed[s.id] != s.completionKey { MarkSeenButton { store.reviewed(s) } }
+                if s.activity == .finished && (store.preferences.reviewed[s.id] != s.completionKey || (!store.preferences.pins.contains(s.id) && store.preferences.keptCardIDs.contains(s.id))) { MarkSeenButton { store.reviewed(s) } }
             }
             Divider()
             HStack {

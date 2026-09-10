@@ -6,7 +6,7 @@
 
 PandaBert is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.4.3 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.4.4 · Public preview · Apple Silicon · macOS 13+**
 
 **DISCLAIMER: I'm not a coder, i'm a creative, everything is done with ai, enjoy.**
 
@@ -26,7 +26,7 @@ PandaBert gives that scattered work a small, persistent home. Its purpose is to 
 
 - **See what needs you.** Observed questions and newly completed turns surface in an attention list. Use **Mark as seen**, or open its thread, to clear that finished response with a brief rubber-band exit; a later completion can surface again.
 - **Notice the newest arrival.** The latest task needing attention gets a soft lavender edge glow for 30 seconds, with a slow breathing cycle and a gentle fade. Regular refreshes do not restart it.
-- **Keep important work pinned.** Pins stay above the attention list and survive relaunches.
+- **Keep important work pinned.** Pins stay above the attention list and survive relaunches. Pinning and acknowledging pinned cards gives a small press animation. Unpinning keeps a card in place until you open its finished thread or mark it as seen again.
 - **Glance at work in progress.** Expand the background section for active, waiting, seen and uncertain tasks.
 - **Group by project.** Repository identities bring related conversations together. Filter by project and give it a friendlier display name.
 - **Return to the conversation.** Open supported local Codex tasks and mapped Claude desktop sessions. Unavailable Claude links are disabled.
@@ -96,7 +96,7 @@ The app is locally ad-hoc signed; this preview has no notarized installer or aut
 
 ## Current scope
 
-Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **55 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
+Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **58 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
 
 Some important boundaries:
 

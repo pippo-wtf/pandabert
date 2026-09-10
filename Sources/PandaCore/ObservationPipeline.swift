@@ -137,8 +137,8 @@ public final class ObservationPipeline {
         }
         var ids = Set<String>()
         all = all.filter { ids.insert($0.id).inserted }.sorted { $0.lastEvent > $1.lastEvent }
-        for var pin in pins where preferences.pins.contains(pin.id) && !ids.contains(pin.id) {
-            pin.sourceOnline = false; pin.reason = "Pinned task outside current observation coverage"; all.append(pin)
+        for var pin in pins where preferences.keptCardIDs.contains(pin.id) && !ids.contains(pin.id) {
+            pin.sourceOnline = false; pin.reason = "Kept task outside current observation coverage"; all.append(pin)
         }
         var coverage = localProfiles == preferences.profiles ? local?.coverage ?? [] : []
         if localError != nil { coverage = coverage.map { var c = $0; c.available = false; c.message = "Local collection unavailable"; return c } }

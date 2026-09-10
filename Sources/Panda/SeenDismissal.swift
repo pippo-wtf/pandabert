@@ -79,3 +79,16 @@ private struct RubberBandGeometry: GeometryEffect {
         return ProjectionTransform(transform)
     }
 }
+
+/// Each pin or pinned acknowledgement gives one short press without moving the card.
+struct CardPress: AnimatableModifier {
+    var progress: Double
+    let reduceMotion: Bool
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+    func body(content: Content) -> some View {
+        content.scaleEffect(reduceMotion ? 1 : 1 - 0.025 * abs(sin(.pi * progress)))
+    }
+}

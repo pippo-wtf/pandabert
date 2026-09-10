@@ -12,6 +12,7 @@ final class PandaStore: ObservableObject {
     @Published var loading = true
     @Published var localMachineID = ""
     @Published var navigationError: String?
+    @Published private(set) var cardPresses: [String: Int] = [:]
     @Published var latestArrival: AttentionArrival?
     @Published private(set) var needsSetup = false
     @Published var showSetup = false
@@ -67,17 +68,29 @@ final class PandaStore: ObservableObject {
         guard preferenceError == nil && !needsSetup else { return }
         do {
             try PandaPaths.save(preferences, to: root.appendingPathComponent("preferences.json"))
-            pinnedCache = preferences.pins.compactMap { id in sessions.first { $0.id == id } ?? pinnedCache.first { $0.id == id } }
+            pinnedCache = preferences.keptCardIDs.compactMap { id in sessions.first { $0.id == id } ?? pinnedCache.first { $0.id == id } }
             try PandaPaths.save(pinnedCache, to: root.appendingPathComponent("pinned-sessions.json"))
         }
         catch { issues.append("Could not save preferences: \(error.localizedDescription)") }
         onTopChanged?(preferences.alwaysOnTop)
         refresh()
     }
-    func pin(_ session: Session) { preferences.togglePin(session.id); save() }
+    func pin(_ session: Session) {
+        preferences.togglePin(session.id)
+        cardPresses[session.id, default: 0] += 1
+        save()
+    }
     func reviewed(_ session: Session) {
+        if preferences.pins.contains(session.id) {
+            preferences.reviewed[session.id] = session.completionKey
+            cardPresses[session.id, default: 0] += 1
+            save()
+            updateArrival(sessions)
+            return
+        }
         withAnimation(SeenDismissal.animation(reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)) {
             preferences.reviewed[session.id] = session.completionKey
+            preferences.releaseUnpinnedCard(session.id)
             save()
             updateArrival(sessions)
         }
@@ -97,16 +110,17 @@ final class PandaStore: ObservableObject {
                     guard session.activity == .finished,
                           let current = self.sessions.first(where: { $0.id == session.id }),
                           current.activity == .finished, current.completionKey == session.completionKey,
-                          self.preferences.reviewed[session.id] != session.completionKey else { return }
+                          (self.preferences.reviewed[session.id] != session.completionKey || self.preferences.keptCardIDs.contains(session.id)) else { return }
                     self.reviewed(session)
                 }
             }
         }
     }
 
-    var attention: [Session] { sessions.filter { preferences.needsAttention($0) && !preferences.pins.contains($0.id) } }
+    var attention: [Session] { sessions.filter { preferences.needsAttention($0) && !preferences.keptCardIDs.contains($0.id) } }
+    var keptCards: [Session] { preferences.keptCardIDs.compactMap { id in sessions.first { $0.id == id } } }
     var pinned: [Session] { preferences.pins.compactMap { id in sessions.first { $0.id == id } } }
-    var background: [Session] { sessions.filter { !preferences.needsAttention($0) && !preferences.pins.contains($0.id) } }
+    var background: [Session] { sessions.filter { !preferences.needsAttention($0) && !preferences.keptCardIDs.contains($0.id) } }
     private func updateArrival(_ current: [Session]) {
         if let arrival = arrivalTracker.observe(current, preferences: preferences) {
             latestArrival = arrival

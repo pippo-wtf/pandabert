@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-public let pandaVersion = "0.4.3"
+public let pandaVersion = "0.4.4"
 public let pandaProtocolVersion = 1
 
 public enum Provider: String, Codable, CaseIterable { case claude, codex
@@ -135,6 +135,11 @@ public struct RemoteMachine: Codable, Identifiable, Equatable {
 }
 public struct Preferences: Codable {
     public var pins: [String] = []
+    public var keptCardOrder: [String]? // Missing in older settings; start with existing pins.
+    public var keptCardIDs: [String] {
+        var seen = Set<String>()
+        return ((keptCardOrder ?? []) + pins).filter { seen.insert($0).inserted }
+    }
     public var reviewed: [String: String] = [:]
     public var projectAliases: [String: String] = [:]
     public var waits: [String: String] = [:]
@@ -145,7 +150,16 @@ public struct Preferences: Codable {
     public var showFinished = true
     public var attentionSince = Date()
     public init() {}
-    public mutating func togglePin(_ id: String) { if pins.contains(id) { pins.removeAll { $0 == id } } else { pins.append(id) } }
+    public mutating func togglePin(_ id: String) {
+        var kept = keptCardIDs
+        if !kept.contains(id) { kept.append(id) }
+        keptCardOrder = kept
+        if pins.contains(id) { pins.removeAll { $0 == id } } else { pins.append(id) }
+    }
+    public mutating func releaseUnpinnedCard(_ id: String) {
+        guard !pins.contains(id) else { return }
+        keptCardOrder = keptCardIDs.filter { $0 != id }
+    }
     public func needsAttention(_ s: Session, now: Date = Date()) -> Bool {
         let a = s.displayActivity(now: now)
         if !s.sourceOnline { return false }
