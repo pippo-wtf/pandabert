@@ -212,3 +212,9 @@ Validation:
 - The empty-state card now uses a synchronized insertion transition. Its entire content stays transparent until the departing card is 80% outside its original position, including the stretched trailing edge, then fades fully in by the end of the same 0.3-second animation. Shared geometry avoids an independent timer or delayed state mutation. Reduced Motion retains a stationary fade; an initially empty panel can show its message immediately.
 - All 55 regression tests passed (`.build/test-empty-state-reveal.txt`). A temporary Swift check using the actual production motion helper sampled 1,001 progress positions and verified zero opacity through the 80% boundary and full opacity at the end. This checks the motion calculation, not rendered frames.
 - Release build, packaging and local signature verification passed (`.build/package-empty-state-reveal.txt`); the rebuilt native app launched successfully. No real task was acknowledged during this follow-up.
+
+## Mirrored exit and delayed settling — 0.4.3 follow-up
+
+- Mirrored the existing 0.3-second exit: short pull left, fast snap right. Remaining content waits 80 ms before its upward spring begins; the explicit exit and empty-state transition keep their original timeline. Reduced Motion remains a stationary fade without the added delay.
+- Updated the shared departure-distance calculation for the rightward exit, preserving the 80% threshold before the empty-state fade. A temporary Swift check against the production helper verified the pull/exit directions and sampled 1,001 positions to confirm the reveal threshold and final opacity.
+- All 55 tests passed (`.build/test-dismissal-mirrored.txt`). Release packaging and signature verification passed (`.build/package-dismissal-mirrored.txt`), and the updated native app launched. This follow-up checked the motion calculation and configured timing, not rendered animation frames; no real task was acknowledged.

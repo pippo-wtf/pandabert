@@ -3,7 +3,7 @@ import SwiftUI
 /// Acknowledgements settle the remaining cards while the departing card stretches out.
 enum SeenDismissal {
     static func animation(reduceMotion: Bool) -> Animation {
-        reduceMotion ? .easeOut(duration: 0.14) : .spring(response: 0.3, dampingFraction: 0.76)
+        reduceMotion ? .easeOut(duration: 0.14) : .spring(response: 0.3, dampingFraction: 0.76).delay(0.08)
     }
     static let duration: TimeInterval = 0.3
 
@@ -49,12 +49,12 @@ private struct RubberBandMotion {
         let pull = smoothExit(t / 0.3)
         let release = min(1, max(0, (t - 0.3) / 0.7))
         let snap = 1 - pow(1 - release, 3)
-        // Pull right for 90 ms, then stretch and snap left out of the panel over 210 ms.
-        displacement = 0.045 * pull - 1.25 * snap
+        // Pull left for 90 ms, then stretch and snap right out of the panel over 210 ms.
+        displacement = -0.045 * pull + 1.25 * snap
         stretch = -0.06 * pull * (1 - smoothExit(release / 0.35)) + 0.10 * sin(.pi * release)
     }
     // Account for the stretched trailing edge, rather than using elapsed time as distance.
-    var fractionOutside: CGFloat { -displacement - stretch / 2 }
+    var fractionOutside: CGFloat { displacement - stretch / 2 }
 }
 
 private struct EmptyStateEntrance: AnimatableModifier {
