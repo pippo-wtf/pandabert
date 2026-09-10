@@ -86,8 +86,6 @@ bash scripts/package.sh
 open dist/PandaBert.app
 ```
 
-Each app launch opens with a short panda animation: the nose drip falls, then gets sniffed back in before the panel appears. The intro uses a 2.7-second deadline, plays once per launch, and shows a still logo when macOS Reduce Motion is enabled.
-
 On first launch, a three-step setup wizard helps you select and name detected Claude Code/Codex log folders, add an existing remote collector, and choose optional GitHub checks. Nothing is observed until you choose **Save and start**. Close the wizard to leave setup unfinished; reopen it with **Set up PandaBert**.
 
 Existing installations keep their configuration. Open the bottom-right sliders icon → **Run setup wizard** to revisit setup. Folder detection is not account verification; normal Claude and Parall desktop-link folders are discovered automatically, while custom log folders can be selected with the folder picker.
