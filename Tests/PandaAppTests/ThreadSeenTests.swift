@@ -120,14 +120,14 @@ final class ThreadSeenTests: XCTestCase {
         XCTAssertEqual(decoded.keptCardIDs, ["existing"])
     }
 
-    private func observeFinishedTask(_ store: PandaStore) throws -> Session {
+    private func observeFinishedTask(_ store: PandaStore, originator: String = "desktop", source: String = "vscode") throws -> Session {
         let root = store.root.appendingPathComponent("sample-profile")
         let logs = root.appendingPathComponent("sessions")
         try FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)
         let id = UUID().uuidString
         let timestamp = ISO8601DateFormatter().string(from: Date())
         let events: [[String: Any]] = [
-            ["type": "session_meta", "timestamp": timestamp, "payload": ["id": id, "cwd": "/Sample/Website", "originator": "desktop"]],
+            ["type": "session_meta", "timestamp": timestamp, "payload": ["id": id, "cwd": "/Sample/Website", "originator": originator, "source": source]],
             ["type": "event_msg", "timestamp": timestamp, "payload": ["type": "user_message", "message": "Sample task"]],
             ["type": "event_msg", "timestamp": timestamp, "payload": ["type": "task_started", "turn_id": "sample-turn"]],
             ["type": "event_msg", "timestamp": timestamp, "payload": ["type": "task_complete", "turn_id": "sample-turn", "last_agent_message": "Ready for review"]]
@@ -225,6 +225,28 @@ final class ThreadSeenTests: XCTestCase {
         XCTAssertFalse(store.sessions.contains { $0.id == s.id })
         XCTAssertFalse(store.preferences.keptCardIDs.contains(s.id))
         XCTAssertNil(store.preferences.reviewed[s.id])
+    }
+
+    func testProcessExclusionPersistsAndCanRestorePinnedObservedSession() throws {
+        let store = try makeStore { _, _, _ in }
+        let s = try observeFinishedTask(store, originator: "Claude Code")
+        store.pin(s)
+        try store.setProcessExcluded(.claudeManagedCodex, excluded: true)
+        XCTAssertTrue(store.sessions.isEmpty)
+        XCTAssertTrue(store.attention.isEmpty)
+        XCTAssertTrue(store.preferences.pins.contains(s.id))
+        XCTAssertTrue(try XCTUnwrap(PreferencesFile.load(root: store.root)).isSessionHidden(s))
+        store.refresh(force: true); waitForUnpinPause()
+        XCTAssertTrue(store.sessions.isEmpty)
+        try store.setProcessExcluded(.claudeManagedCodex, excluded: false)
+        let restored = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in store.pinned.contains { $0.id == s.id } }, object: nil)
+        wait(for: [restored], timeout: 3)
+        XCTAssertFalse(store.preferences.isSessionHidden(s))
+        try store.deleteCard(s)
+        try store.setProcessExcluded(.claudeManagedCodex, excluded: true)
+        try store.setProcessExcluded(.claudeManagedCodex, excluded: false)
+        XCTAssertTrue(store.sessions.isEmpty)
+        XCTAssertTrue(store.preferences.isCardDeleted(s.id))
     }
 
 }

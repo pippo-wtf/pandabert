@@ -6,7 +6,7 @@
 
 PandaBert is a small native macOS panel for people working across Claude Code and Codex conversations. It gathers observed activity into one place, groups tasks by repository, and brings questions and finished turns to your attention. Keep it beside your work, pin what matters, and jump back into a supported conversation when it is time to respond.
 
-**Current version: 0.4.6 · Public preview · Apple Silicon · macOS 13+**
+**Current version: 0.4.7 · Public preview · Apple Silicon · macOS 13+**
 
 **DISCLAIMER: I'm not a coder, i'm a creative, everything is done with ai, enjoy.**
 
@@ -26,6 +26,7 @@ PandaBert gives that scattered work a small, persistent home. Its purpose is to 
 
 - **See what needs you.** Observed questions and newly completed turns surface in an attention list. Use **Mark as seen**, or open its thread, to clear that finished response with a brief rubber-band exit; a later completion can surface again.
 - **Notice the newest arrival.** The latest task needing attention gets a soft lavender edge glow for 30 seconds, with a slow breathing cycle and a gentle fade. Regular refreshes do not restart it.
+- **Exclude agent-managed work.** Connections → **Excluded processes** has separate switches for Codex sessions explicitly launched by Claude Code and all Codex background (`codex exec`) runs. Details also offers **Exclude this process type** on recognised sessions. Exclusions hide matching cards and panel counts, including pins, without stopping the work; switch them off to restore visibility.
 - **Remove unwanted cards.** Open Details → **Delete card** to remove a duplicate or unwanted card from PandaBert. It stays excluded through refreshes and relaunches, including later activity. The original conversation is untouched. Connections → **Restore deleted cards** brings back excluded cards that are still within observation coverage.
 - **Keep important work pinned.** Pins stay above the attention list and survive relaunches. Pinning and acknowledging pinned cards gives a small press animation. After unpinning, an unseen card pauses briefly, then returns to Needs you. Already-seen cards stay in place until you open their finished thread or mark them as seen again.
 - **Glance at work in progress.** Expand the background section for active, waiting, seen and uncertain tasks.
@@ -97,7 +98,7 @@ The app is locally ad-hoc signed by default; this preview has no notarized insta
 
 ## Current scope
 
-Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **65 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
+Local collection, the floating panel, repository grouping, pins and supported thread links are implemented. The latest source test suite passed **68 tests**; [validation notes](VALIDATION.md) distinguish fixture checks from live verification.
 
 Some important boundaries:
 

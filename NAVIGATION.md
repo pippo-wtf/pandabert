@@ -24,7 +24,7 @@ Optional identity fields preserve decoding of existing PandaBert snapshots and p
 
 ## Validation
 
-The full suite passes: **65 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
+The full suite passes: **68 tests, 0 failures**. Navigation coverage includes exact URLs, local/remote boundaries, malformed-ID rejection, bridge-only rejection, terminal non-import behavior, old snapshot compatibility, CLI-to-desktop mapping, deleted/changed mappings at click time ambiguous metadata across accounts, Parall folder discovery, prior CLI IDs and separate fork identity.
 
 The release app and embedded collector were rebuilt and locally signature-verified. Live navigation results are recorded in `VALIDATION.md`.
 
@@ -49,3 +49,7 @@ Pin changes and pinned acknowledgements use a brief press-in animation without a
 ## Delete card — 0.4.6
 
 Details includes Delete card for any card, including pinned, seen and unavailable cards. Deletion persists the exact PandaBert card ID before changing the interface, removes its pin/retained position and cached copy, cancels pending unpin movement, and excludes it from subsequent observation updates. Later activity for that same card remains hidden until restored. Failed persistence keeps the card visible and reports an error. Delayed navigation callbacks cannot mark a deleted card seen or bring it back. The original Claude/Codex session and transcript are never deleted or edited. Connections → Restore deleted cards clears all exclusions; only cards still within observation coverage return, without their old pins.
+
+## Exclude process types — 0.4.7
+
+Connections → Excluded processes controls two persistent switches: Codex launched by Claude and Codex background runs. Details identifies either recognised type and offers Exclude this process type. The choice is saved before filtering cards from the panel and counts, including pinned cards; pins remain saved and return when the filter is disabled. This does not launch, stop or modify provider sessions. Explicitly deleted cards remain deleted when a process filter is disabled.

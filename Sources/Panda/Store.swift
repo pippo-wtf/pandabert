@@ -120,6 +120,19 @@ final class PandaStore: ObservableObject {
             updateArrival(sessions)
         }
     }
+    func setProcessExcluded(_ kind: ProcessExclusion, excluded: Bool) throws {
+        guard preferenceError == nil && !needsSetup else { throw PandaError.message("Saved settings are unavailable.") }
+        var next = preferences
+        var kinds = next.excludedProcessKinds ?? []
+        if excluded { kinds.insert(kind.rawValue) } else { kinds.remove(kind.rawValue) }
+        next.excludedProcessKinds = kinds.isEmpty ? nil : kinds
+        try PandaPaths.save(next, to: root.appendingPathComponent("preferences.json"))
+        preferences = next
+        sessions.removeAll { preferences.isSessionHidden($0) }
+        updateArrival(sessions)
+        refresh()
+    }
+
     func deleteCard(_ session: Session) throws {
         guard preferenceError == nil && !needsSetup else { throw PandaError.message("Saved settings are unavailable. The card was not deleted.") }
         var next = preferences
@@ -195,7 +208,7 @@ final class PandaStore: ObservableObject {
                 guard let self else { return }
                 self.localMachineID = update.localMachineID
                 self.arrivalTracker.establishBaseline(update.baselineSessions, preferences: self.preferences)
-                let visible = update.sessions.filter { !self.preferences.isCardDeleted($0.id) }
+                let visible = update.sessions.filter { !self.preferences.isSessionHidden($0) }
                 self.updateArrival(visible)
                 self.sessions = visible; self.coverage = update.coverage; self.issues = update.issues
                 self.refreshed = update.refreshed

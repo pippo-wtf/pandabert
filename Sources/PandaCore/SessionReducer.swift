@@ -51,6 +51,8 @@ public struct SessionReducer {
         let at = Self.date(o["timestamp"]) ?? .distantPast
         metadata(p)
         if kind == "session_meta" {
+            session.originator = (p["originator"] as? String).map { clipped($0, 100) }
+            session.launchSource = (p["source"] as? String).map { clipped($0, 100) }
             session.entrypoint = (p["originator"] as? String ?? "").lowercased().contains("desktop") ? "Desktop" : "Codex session"
             if let source = p["source"] as? [String: Any], source["subagent"] != nil { session.sidechain = true }
             if let source = p["source"] as? String, source.contains("subagent") { session.sidechain = true }

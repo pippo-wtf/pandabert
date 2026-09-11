@@ -1,6 +1,6 @@
 # Coverage and limitations
 
-PandaBert 0.4.6 is a local preview. These limits describe the implementation, not a promise of future delivery.
+PandaBert 0.4.7 is a local preview. These limits describe the implementation, not a promise of future delivery.
 
 ## Collection behavior
 
@@ -21,7 +21,7 @@ PandaBert 0.4.6 is a local preview. These limits describe the implementation, no
 
 ## Validation status
 
-The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 65 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
+The local panel, collection, pin persistence and one mapped Claude desktop navigation have been exercised live. Remote collection and four simultaneous account/profile combinations still need a real multi-machine acceptance run. The latest source suite passed 68 tests. See [VALIDATION.md](../VALIDATION.md) for what was actually checked and [NAVIGATION.md](../NAVIGATION.md) for thread-link behavior.
 
 [Back to the overview](../README.md)
 
@@ -36,3 +36,7 @@ The app opens a three-step wizard when no preferences file exists. It discovers 
 ## Folder permissions and signing
 
 Project grouping reads only repository/path metadata in observed logs; it does not inspect project directories or run Git in them. If repository metadata is missing or contradictory, grouping falls back to the recorded local folder path, so cross-machine grouping may be less complete. Configured logs and Claude desktop-link metadata still require normal filesystem access. Selecting a custom log folder in a protected location may require consent. Ad-hoc builds can prompt again after rebuilding; persistent Developer ID signing is supported by the packaging script but requires an installed signing identity. macOS permissions are not altered or bypassed.
+
+## Process exclusions
+
+Optional, independent switches hide Codex sessions whose metadata explicitly names Claude Code as the originator, or Codex exec sessions identified by their launcher/source metadata. Both default off. The exec switch includes manually launched background runs; their logs do not establish whether Claude is the parent process. Ordinary desktop, interactive terminal, Claude sessions and unknown launchers are not inferred to be delegated. Existing explicit subagent filtering remains unchanged. Older remote collectors and old cached snapshots without launcher metadata cannot be classified until updated/refreshed. Exclusions affect PandaBert's display and attention counts, not running processes or original conversations; deleted-card exclusions remain independent.

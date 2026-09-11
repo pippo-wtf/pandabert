@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-public let pandaVersion = "0.4.6"
+public let pandaVersion = "0.4.7"
 public let pandaProtocolVersion = 1
 
 public enum Provider: String, Codable, CaseIterable { case claude, codex
@@ -61,6 +61,23 @@ public struct PullRequest: Codable, Equatable {
         return "Pull request linked"
     }
 }
+public enum ProcessExclusion: String, CaseIterable, Hashable {
+    case claudeManagedCodex = "claude_managed_codex"
+    case codexExec = "codex_exec"
+    public var label: String {
+        switch self {
+        case .claudeManagedCodex: return "Codex launched by Claude"
+        case .codexExec: return "Codex background runs"
+        }
+    }
+    public var explanation: String {
+        switch self {
+        case .claudeManagedCodex: return "Sessions whose logs explicitly identify Claude Code as the launcher."
+        case .codexExec: return "All codex exec runs, including jobs started manually or by other agents. The logs do not identify their parent app."
+        }
+    }
+}
+
 public struct Session: Codable, Identifiable, Equatable {
     public var id: String
     public var nativeID: String
@@ -86,6 +103,15 @@ public struct Session: Codable, Identifiable, Equatable {
     public var bridgeSessionID: String?
     public var desktopSessionID: String?
     public var entrypoint: String = "Local session"
+    public var originator: String?
+    public var launchSource: String?
+    public var processExclusion: ProcessExclusion? {
+        guard provider == .codex else { return nil }
+        let launcher = originator?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if launcher == "claude code" { return .claudeManagedCodex }
+        if launcher == "codex_exec" || launchSource?.lowercased() == "exec" { return .codexExec }
+        return nil
+    }
     public var pullRequest: PullRequest?
     public var sidechain = false
     public var sourceOnline = true
@@ -135,6 +161,10 @@ public struct RemoteMachine: Codable, Identifiable, Equatable {
 }
 public struct Preferences: Codable {
     public var pins: [String] = []
+    public var excludedProcessKinds: Set<String>?
+    public func isSessionHidden(_ session: Session) -> Bool {
+        isCardDeleted(session.id) || session.processExclusion.map { excludedProcessKinds?.contains($0.rawValue) == true } == true
+    }
     public var deletedCardIDs: Set<String>? // Optional for compatibility with older preferences.
     public func isCardDeleted(_ id: String) -> Bool { deletedCardIDs?.contains(id) == true }
     public var keptCardOrder: [String]? // Missing in older settings; start with existing pins.
@@ -164,7 +194,7 @@ public struct Preferences: Codable {
     }
     public func needsAttention(_ s: Session, now: Date = Date()) -> Bool {
         let a = s.displayActivity(now: now)
-        if isCardDeleted(s.id) || !s.sourceOnline { return false }
+        if isSessionHidden(s) || !s.sourceOnline { return false }
         let pr = s.pullRequest?.isFresh(now: now) == true ? s.pullRequest : nil
         if pr?.checksFailed == true || pr?.review == "CHANGES_REQUESTED" { return true }
         if a == .finished && (waits[s.id] != nil || pr?.isWaiting == true) { return false }

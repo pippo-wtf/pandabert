@@ -193,6 +193,16 @@ struct DetailView: View {
             HStack(spacing: 6) { Circle().fill(appearance.tone.accent).frame(width: 6, height: 6); Text(appearance.label).font(.caption).foregroundStyle(.secondary) }
             OpenThreadButton(store: store, session: s)
             if ThreadLink(session: s, localMachineID: store.localMachineID).url == nil { Text(ThreadLink(session: s, localMachineID: store.localMachineID).explanation).font(.caption).foregroundStyle(.secondary) }
+            if let kind = s.processExclusion {
+                HStack {
+                    Text(kind.label).font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Exclude this process type") {
+                        do { try store.setProcessExcluded(kind, excluded: true); dismiss() }
+                        catch { deletionError = "Could not save the exclusion. " + error.localizedDescription }
+                    }.font(.caption).help(kind.explanation + " Change this in Connections → Excluded processes.")
+                }
+            }
             Text("\(s.provider.label) · \(s.machine) · \(s.profileLabel)\n\(s.reason)").font(.caption).foregroundStyle(.secondary)
             Text("Last activity: \(s.lastActivityEvent.formatted(date: .abbreviated, time: .shortened))").font(.caption).foregroundStyle(.secondary)
             ScrollView { Text(s.excerpt.isEmpty ? "No message excerpt available. Open the original session for full context." : s.excerpt).font(.system(size: 12)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(12) }.frame(minHeight: 130, maxHeight: 210).background(neutralSurface, in: RoundedRectangle(cornerRadius: 12))
@@ -227,7 +237,7 @@ struct DetailView: View {
                 .font(.system(size: 10)).foregroundStyle(.secondary)
             Text("Reply in the original Claude or Codex session. A finished turn is not a completed project; PandaBert does not invent a progress percentage.").font(.system(size: 10)).foregroundStyle(.secondary)
         }.padding(22).frame(width: 390).onAppear { waiting = store.preferences.waits[s.id] ?? ""; alias = store.preferences.projectName(s) }
-            .alert("Could not delete card", isPresented: Binding(get: { deletionError != nil }, set: { if !$0 { deletionError = nil } })) {
+            .alert("Could not save change", isPresented: Binding(get: { deletionError != nil }, set: { if !$0 { deletionError = nil } })) {
                 Button("OK") { deletionError = nil }
             } message: { Text(deletionError ?? "") }
             .onChange(of: store.preferences.reviewed[s.id]) { seen in
@@ -272,6 +282,21 @@ struct SettingsView: View {
                             settingsMessage = SMAppService.mainApp.status == .requiresApproval ? "Allow PandaBert in System Settings → Login Items." : ""
                         } catch { settingsMessage = "Login setup unavailable. Move PandaBert to Applications and try again." }
                     }))
+                    Divider()
+                    Text("Excluded processes").font(.headline)
+                    ForEach(ProcessExclusion.allCases, id: \.self) { kind in
+                        Toggle("Hide " + kind.label, isOn: Binding(
+                            get: { store.preferences.excludedProcessKinds?.contains(kind.rawValue) == true },
+                            set: { excluded in
+                                do { try store.setProcessExcluded(kind, excluded: excluded) }
+                                catch { settingsMessage = "Could not save process exclusion: " + error.localizedDescription }
+                            }
+                        ))
+                        Text(kind.explanation).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Text("Matching cards, including pinned cards, are hidden from the panel and counts. Their processes keep running. Turn a switch off to show them again.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Divider()
                     Toggle("Show finished turns for review", isOn: $store.preferences.showFinished).onChange(of: store.preferences.showFinished) { _ in store.save() }
                     Toggle("Check linked pull requests using GitHub CLI", isOn: $store.preferences.githubEnabled).onChange(of: store.preferences.githubEnabled) { _ in store.save(); store.refresh(force: true) }
                     Text("Uses your existing gh login. GitHub receives only linked pull request URLs. No chat text leaves this Mac.").font(.caption).foregroundStyle(.secondary)
